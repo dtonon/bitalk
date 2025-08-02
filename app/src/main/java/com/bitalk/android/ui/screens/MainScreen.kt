@@ -19,8 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -182,7 +185,7 @@ fun StatusBar(
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = Color(0xFFE0E0E0)
+        color = BitalkAccent
     ) {
         Row(
             modifier = Modifier
@@ -191,22 +194,20 @@ fun StatusBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .background(
-                            if (isScanning) Color.Green else Color.Gray,
-                            CircleShape
-                        )
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = if (isScanning) "Scanning: $nearbyUserCount nearby users" else "Paused",
-                    fontSize = 18.sp,
-                    color = Color.Black
-                )
-            }
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("Bitalk")
+                    }
+                    if (isScanning) {
+                        append(" - Scanning: $nearbyUserCount nearby users")
+                    } else {
+                        append(" - Paused")
+                    }
+                },
+                fontSize = 18.sp,
+                color = Color.White
+            )
 
             IconButton(
                 onClick = onToggleScanning,
@@ -215,7 +216,7 @@ fun StatusBar(
                 Icon(
                     imageVector = if (isScanning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                     contentDescription = if (isScanning) "Pause" else "Play",
-                    tint = Color.Black
+                    tint = Color.White
                 )
             }
         }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Bitalk" parent="android:Theme.Material.Light">
+    <style name="Theme.Bitalk" parent="android:Theme.Material.Light.NoActionBar">
         <!-- Primary brand color -->
         <item name="android:colorPrimary">@color/bitalk_accent</item>
         
