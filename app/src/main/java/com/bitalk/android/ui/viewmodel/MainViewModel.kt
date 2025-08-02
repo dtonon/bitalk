@@ -10,6 +10,7 @@ import com.bitalk.android.data.UserManager
 import com.bitalk.android.model.DefaultTopics
 import com.bitalk.android.model.NearbyUser
 import com.bitalk.android.model.UserProfile
+import com.bitalk.android.notification.NotificationService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,6 +28,7 @@ class MainViewModel : ViewModel(), BitalkBLEDelegate {
     // Services
     private var bleService: BitalkBLEService? = null
     private var userManager: UserManager? = null
+    private var notificationService: NotificationService? = null
     
     // UI State
     private val _uiState = MutableStateFlow(MainUIState())
@@ -42,6 +44,7 @@ class MainViewModel : ViewModel(), BitalkBLEDelegate {
         
         // Initialize services
         userManager = UserManager(context)
+        notificationService = NotificationService(context)
         bleService = BitalkBLEService(context).apply {
             delegate = this@MainViewModel
         }
@@ -178,7 +181,10 @@ class MainViewModel : ViewModel(), BitalkBLEDelegate {
         
         _uiState.value = _uiState.value.copy(nearbyUsers = currentUsers)
         
-        // TODO: Show notification
+        // Show notification for new users only (not updates)
+        if (existingIndex < 0) {
+            notificationService?.showUserMatchNotification(user)
+        }
     }
     
     override fun onUserUpdated(user: NearbyUser) {

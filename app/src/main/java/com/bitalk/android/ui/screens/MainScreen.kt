@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bitalk.android.model.NearbyUser
+import com.bitalk.android.notification.NotificationClickHandler
 import com.bitalk.android.ui.components.*
 import com.bitalk.android.ui.theme.BitalkAccent
 import com.bitalk.android.ui.viewmodel.MainViewModel
@@ -46,6 +47,41 @@ fun MainScreen() {
     var showPreferencesModal by remember { mutableStateOf(false) }
     var showUsernameModal by remember { mutableStateOf(false) }
     var selectedUser by remember { mutableStateOf<NearbyUser?>(null) }
+    
+    // Handle notification clicks
+    LaunchedEffect(Unit) {
+        // Check for any pending notification data first
+        NotificationClickHandler.getPendingUserData()?.let { userData ->
+            val userFromNotification = NearbyUser(
+                username = userData.username,
+                description = userData.description,
+                topics = userData.topics,
+                rssi = -50, // Default values since we don't have real BLE data
+                estimatedDistance = 0.0,
+                matchingTopics = userData.matchingTopics,
+                firstSeen = System.currentTimeMillis(),
+                lastSeen = System.currentTimeMillis(),
+                deviceAddress = null
+            )
+            selectedUser = userFromNotification
+        }
+        
+        // Set listener for future notification clicks
+        NotificationClickHandler.setOnUserDataAvailable { userData ->
+            val userFromNotification = NearbyUser(
+                username = userData.username,
+                description = userData.description,
+                topics = userData.topics,
+                rssi = -50, // Default values since we don't have real BLE data
+                estimatedDistance = 0.0,
+                matchingTopics = userData.matchingTopics,
+                firstSeen = System.currentTimeMillis(),
+                lastSeen = System.currentTimeMillis(),
+                deviceAddress = null
+            )
+            selectedUser = userFromNotification
+        }
+    }
     
     Column(
         modifier = Modifier.fillMaxSize()
