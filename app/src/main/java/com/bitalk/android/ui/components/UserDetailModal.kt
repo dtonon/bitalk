@@ -45,16 +45,9 @@ fun UserDetailModal(
                 // Header
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "User Details",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = BitalkAccent
-                    )
-
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Filled.Close,
@@ -63,7 +56,7 @@ fun UserDetailModal(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 // User info
                 Column(
@@ -108,21 +101,13 @@ fun UserDetailModal(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Topics section
-                Text(
-                    text = "Topics (${user.topics.size})",
-                    fontSize = 21.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
                 // Topics list
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(user.topics) { topic ->
+                    // Sort topics to show matching ones first
+                    val sortedTopics = user.topics.sortedBy { !user.matchingTopics.contains(it) }
+                    items(sortedTopics) { topic ->
                         Surface(
                             shape = RoundedCornerShape(12.dp),
                             color = if (user.matchingTopics.contains(topic)) {
@@ -151,18 +136,6 @@ fun UserDetailModal(
                             )
                         }
                     }
-                }
-
-                if (user.matchingTopics.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        text = "Matching Topics: ${user.matchingTopics.joinToString(", ")}",
-                        fontSize = 18.sp,
-                        color = BitalkAccent,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
