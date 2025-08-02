@@ -93,6 +93,15 @@ class MainViewModel : ViewModel(), BitalkBLEDelegate {
     }
     
     /**
+     * Update description
+     */
+    fun updateDescription(newDescription: String) {
+        val currentProfile = _uiState.value.userProfile
+        val updatedProfile = currentProfile.copy(description = newDescription)
+        updateUserProfile(updatedProfile)
+    }
+    
+    /**
      * Update topics
      */
     fun updateTopics(newTopics: List<String>) {

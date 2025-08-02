@@ -125,6 +125,7 @@ fun MainScreen() {
         // Username Footer
         UsernameFooter(
             username = uiState.userProfile.username,
+            description = uiState.userProfile.description,
             onUsernameClick = {
                 showUsernameModal = true
             }
@@ -156,8 +157,10 @@ fun MainScreen() {
     if (showUsernameModal) {
         UsernameEditModal(
             currentUsername = uiState.userProfile.username,
-            onUsernameChanged = { newUsername ->
+            currentDescription = uiState.userProfile.description,
+            onUserInfoChanged = { newUsername, newDescription ->
                 viewModel.updateUsername(newUsername)
+                viewModel.updateDescription(newDescription)
             },
             onDismiss = { showUsernameModal = false }
         )
@@ -405,6 +408,7 @@ fun TopicChip(topic: String) {
 @Composable
 fun UsernameFooter(
     username: String,
+    description: String,
     onUsernameClick: () -> Unit
 ) {
     Surface(
@@ -412,11 +416,11 @@ fun UsernameFooter(
         color = MaterialTheme.colorScheme.surface
     ) {
         Text(
-            text = "bitalk/$username",
+            text = "$username: $description",
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onUsernameClick() }
-                .padding(16.dp),
+                .padding(top = 0.dp, bottom = 16.dp, start = 16.dp, end = 16.dp),
             fontSize = 18.sp,
             color = Color.Gray,
             textAlign = TextAlign.Center

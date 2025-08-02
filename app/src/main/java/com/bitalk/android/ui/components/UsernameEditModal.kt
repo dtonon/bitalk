@@ -21,13 +21,18 @@ import com.bitalk.android.ui.theme.BitalkAccent
 @Composable
 fun UsernameEditModal(
     currentUsername: String,
-    onUsernameChanged: (String) -> Unit,
+    currentDescription: String,
+    onUserInfoChanged: (String, String) -> Unit,
     onDismiss: () -> Unit
 ) {
     var username by remember { mutableStateOf(currentUsername) }
-    val isValid = username.isNotBlank() &&
-                  username.length in 3..20 &&
-                  username.matches(Regex("^[a-zA-Z0-9_]+$"))
+    var description by remember { mutableStateOf(currentDescription) }
+    val isUsernameValid = username.isNotBlank() &&
+                         username.length in 3..20 &&
+                         username.matches(Regex("^[a-zA-Z0-9_]+$"))
+    
+    val isDescriptionValid = description.length <= 100
+    val isValid = isUsernameValid && isDescriptionValid
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -49,7 +54,7 @@ fun UsernameEditModal(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = stringResource(R.string.change_username),
+                        text = "Change user info",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = BitalkAccent
@@ -76,9 +81,9 @@ fun UsernameEditModal(
                         capitalization = KeyboardCapitalization.None
                     ),
                     textStyle = androidx.compose.ui.text.TextStyle(fontSize = 18.sp),
-                    isError = username.isNotBlank() && !isValid,
+                    isError = username.isNotBlank() && !isUsernameValid,
                     supportingText = {
-                        if (username.isNotBlank() && !isValid) {
+                        if (username.isNotBlank() && !isUsernameValid) {
                             Text(
                                 text = "Username must be 3-20 characters, letters, numbers, and underscores only",
                                 color = MaterialTheme.colorScheme.error,
@@ -93,6 +98,40 @@ fun UsernameEditModal(
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
+
+                // Description input
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("Description") },
+                    placeholder = { Text("e.g., yellow shirt and sunglasses") },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences
+                    ),
+                    textStyle = androidx.compose.ui.text.TextStyle(fontSize = 18.sp),
+                    maxLines = 3,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = BitalkAccent,
+                        focusedLabelColor = BitalkAccent
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Character count for description
+                Text(
+                    text = "${description.length}/100",
+                    fontSize = 16.sp,
+                    color = if (description.length > 100) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    },
+                    modifier = Modifier.align(Alignment.End)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // Action buttons
                 Row(
@@ -111,7 +150,7 @@ fun UsernameEditModal(
 
                     Button(
                         onClick = {
-                            onUsernameChanged(username)
+                            onUserInfoChanged(username, description)
                             onDismiss()
                         },
                         modifier = Modifier.weight(1f),
