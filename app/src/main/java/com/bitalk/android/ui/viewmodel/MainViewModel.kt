@@ -99,6 +99,15 @@ class MainViewModel : ViewModel(), BitalkBLEDelegate {
     }
     
     /**
+     * Update topics with all custom topics list
+     */
+    fun updateTopics(newTopics: List<String>, allCustomTopics: List<String>) {
+        val currentProfile = _uiState.value.userProfile
+        val updatedProfile = currentProfile.copy(topics = newTopics, allCustomTopics = allCustomTopics)
+        updateUserProfile(updatedProfile)
+    }
+    
+    /**
      * Update exact match mode
      */
     fun updateExactMatchMode(exactMode: Boolean) {

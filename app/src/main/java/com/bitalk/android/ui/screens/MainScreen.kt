@@ -99,8 +99,9 @@ fun MainScreen() {
     if (showTopicsModal) {
         TopicEditModal(
             currentTopics = uiState.userProfile.topics,
-            onTopicsChanged = { newTopics ->
-                viewModel.updateTopics(newTopics)
+            allCustomTopics = uiState.userProfile.allCustomTopics,
+            onTopicsChanged = { newTopics, allCustomTopics ->
+                viewModel.updateTopics(newTopics, allCustomTopics)
             },
             onDismiss = { showTopicsModal = false }
         )

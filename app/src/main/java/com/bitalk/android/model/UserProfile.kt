@@ -11,6 +11,7 @@ data class UserProfile(
     val username: String,
     val description: String,
     val topics: List<String>,
+    val allCustomTopics: List<String> = emptyList(),
     val exactMatchMode: Boolean = false
 ) : Parcelable
 

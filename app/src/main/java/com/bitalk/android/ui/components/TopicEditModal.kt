@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -34,41 +33,51 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TopicEditModal(
-    currentTopics: List<String>,
-    onTopicsChanged: (List<String>) -> Unit,
+    currentTopics: List<String>?,
+    allCustomTopics: List<String>? = null,
+    onTopicsChanged: (selectedTopics: List<String>, allCustomTopics: List<String>) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var selectedTopics by remember { mutableStateOf(currentTopics.toSet()) }
+    var selectedTopics by remember { mutableStateOf((currentTopics ?: emptyList()).toSet()) }
+    var allCustomTopicsList by remember { mutableStateOf((allCustomTopics ?: emptyList()).toSet()) }
     var customTopic by remember { mutableStateOf("") }
     var showAddCustom by remember { mutableStateOf(false) }
     
     val listState = rememberLazyListState()
     val focusRequester = remember { FocusRequester() }
-    val keyboardController = LocalSoftwareKeyboardController.current
     
-    // Create a stable list that maintains order and includes custom topics
-    val allTopics = remember(selectedTopics) {
-        val customTopics = selectedTopics.filter { !DefaultTopics.topics.contains(it) }
-        val selectedDefaults = DefaultTopics.topics.filter { selectedTopics.contains(it) }
-        val unselectedDefaults = DefaultTopics.topics.filter { !selectedTopics.contains(it) }.sorted()
-        
-        // Selected topics first (custom + default), then unselected sorted
-        customTopics + selectedDefaults + unselectedDefaults
+    // Create a stable list that maintains order and includes all custom topics (selected and unselected)
+    val allTopics = remember(selectedTopics, allCustomTopicsList) {
+        try {
+            val selectedCustomTopics = allCustomTopicsList.filter { selectedTopics.contains(it) }
+            val selectedDefaults = DefaultTopics.topics.filter { selectedTopics.contains(it) }
+            val unselectedCustomTopics = allCustomTopicsList.filter { !selectedTopics.contains(it) }.sorted()
+            val unselectedDefaults = DefaultTopics.topics.filter { !selectedTopics.contains(it) }.sorted()
+            
+            // Selected topics first (custom + default), then unselected sorted (custom + default)
+            selectedCustomTopics + selectedDefaults + unselectedCustomTopics + unselectedDefaults
+        } catch (e: Exception) {
+            // Fallback to simple list
+            DefaultTopics.topics
+        }
     }
     
     // Auto-scroll to top when custom topic is added
-    LaunchedEffect(selectedTopics.filter { !DefaultTopics.topics.contains(it) }.size) {
-        if (selectedTopics.any { !DefaultTopics.topics.contains(it) }) {
+    LaunchedEffect(allCustomTopicsList.size) {
+        if (allCustomTopicsList.isNotEmpty()) {
             listState.animateScrollToItem(0)
         }
     }
     
-    // Auto-focus and show keyboard when input appears
+    // Auto-focus when input appears
     LaunchedEffect(showAddCustom) {
         if (showAddCustom) {
-            delay(100) // Small delay to ensure UI is ready
-            focusRequester.requestFocus()
-            keyboardController?.show()
+            delay(100)
+            try {
+                focusRequester.requestFocus()
+            } catch (e: Exception) {
+                // Ignore focus errors
+            }
         }
     }
     
@@ -153,7 +162,9 @@ fun TopicEditModal(
                                     TextButton(
                                         onClick = {
                                             if (customTopic.isNotBlank()) {
-                                                selectedTopics = selectedTopics + customTopic.trim().lowercase()
+                                                val newCustomTopic = customTopic.trim().lowercase()
+                                                allCustomTopicsList = allCustomTopicsList + newCustomTopic
+                                                selectedTopics = selectedTopics + newCustomTopic
                                                 customTopic = ""
                                                 showAddCustom = false
                                             }
@@ -205,7 +216,7 @@ fun TopicEditModal(
                     
                     Button(
                         onClick = {
-                            onTopicsChanged(selectedTopics.toList())
+                            onTopicsChanged(selectedTopics.toList(), allCustomTopicsList.toList())
                             onDismiss()
                         },
                         modifier = Modifier.weight(1f),
