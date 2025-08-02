@@ -39,12 +39,13 @@ data class NearbyUser(
         get() = System.currentTimeMillis() - firstSeen
         
     /**
-     * Get formatted distance string
+     * Get formatted distance string based on RSSI
      */
     val formattedDistance: String
         get() = when {
-            estimatedDistance < 1.0 -> "<1m"
-            estimatedDistance < 10.0 -> "~${estimatedDistance.toInt()}m"
-            else -> "~${(estimatedDistance / 10).toInt() * 10}m+"
+            rssi > -50 -> "Very Close"
+            rssi > -70 -> "Close"
+            rssi > -85 -> "Far"
+            else -> "Very Far"
         }
 }

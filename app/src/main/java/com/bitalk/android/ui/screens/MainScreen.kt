@@ -16,7 +16,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
@@ -27,6 +26,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlin.math.ln
+import kotlin.math.max
+import kotlin.math.min
 import com.bitalk.android.model.NearbyUser
 import com.bitalk.android.notification.NotificationClickHandler
 import com.bitalk.android.ui.components.*
@@ -39,9 +41,7 @@ fun MainScreen() {
     val context = LocalContext.current
 
     // Initialize ViewModel with context
-    LaunchedEffect(Unit) {
-        viewModel.initialize(context)
-    }
+    LaunchedEffect(Unit) { viewModel.initialize(context) }
 
     val uiState by viewModel.uiState.collectAsState()
 
@@ -55,168 +55,140 @@ fun MainScreen() {
     LaunchedEffect(Unit) {
         // Check for any pending notification data first
         NotificationClickHandler.getPendingUserData()?.let { userData ->
-            val userFromNotification = NearbyUser(
-                username = userData.username,
-                description = userData.description,
-                topics = userData.topics,
-                rssi = -50, // Default values since we don't have real BLE data
-                estimatedDistance = 0.0,
-                matchingTopics = userData.matchingTopics,
-                firstSeen = System.currentTimeMillis(),
-                lastSeen = System.currentTimeMillis(),
-                deviceAddress = null
-            )
+            val userFromNotification =
+                    NearbyUser(
+                            username = userData.username,
+                            description = userData.description,
+                            topics = userData.topics,
+                            rssi = -50, // Default values since we don't have real BLE data
+                            estimatedDistance = 0.0,
+                            matchingTopics = userData.matchingTopics,
+                            firstSeen = System.currentTimeMillis(),
+                            lastSeen = System.currentTimeMillis(),
+                            deviceAddress = null
+                    )
             selectedUser = userFromNotification
         }
 
         // Set listener for future notification clicks
         NotificationClickHandler.setOnUserDataAvailable { userData ->
-            val userFromNotification = NearbyUser(
-                username = userData.username,
-                description = userData.description,
-                topics = userData.topics,
-                rssi = -50, // Default values since we don't have real BLE data
-                estimatedDistance = 0.0,
-                matchingTopics = userData.matchingTopics,
-                firstSeen = System.currentTimeMillis(),
-                lastSeen = System.currentTimeMillis(),
-                deviceAddress = null
-            )
+            val userFromNotification =
+                    NearbyUser(
+                            username = userData.username,
+                            description = userData.description,
+                            topics = userData.topics,
+                            rssi = -50, // Default values since we don't have real BLE data
+                            estimatedDistance = 0.0,
+                            matchingTopics = userData.matchingTopics,
+                            firstSeen = System.currentTimeMillis(),
+                            lastSeen = System.currentTimeMillis(),
+                            deviceAddress = null
+                    )
             selectedUser = userFromNotification
         }
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    Column(modifier = Modifier.fillMaxSize()) {
         // Status Bar
         StatusBar(
-            nearbyUserCount = uiState.nearbyUsers.size,
-            isScanning = uiState.isScanning,
-            onToggleScanning = { viewModel.toggleScanning() }
+                nearbyUserCount = uiState.nearbyUsers.size,
+                isScanning = uiState.isScanning,
+                onToggleScanning = { viewModel.toggleScanning() }
         )
 
         // Main Content Area - Bubbles
-        Box(
-            modifier = Modifier.weight(1f),
-            contentAlignment = Alignment.BottomCenter
-        ) {
+        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
             if (uiState.nearbyUsers.isEmpty()) {
                 EmptyState(isScanning = uiState.isScanning)
             } else {
                 BubbleArea(
-                    nearbyUsers = uiState.nearbyUsers,
-                    onUserClick = { user ->
-                        selectedUser = user
-                    }
+                        nearbyUsers = uiState.nearbyUsers,
+                        onUserClick = { user -> selectedUser = user }
                 )
             }
         }
 
         // Topics Section
         TopicsSection(
-            topics = uiState.userProfile.topics,
-            exactMatchMode = uiState.userProfile.exactMatchMode,
-            onTopicsClick = {
-                showTopicsModal = true
-            },
-            onPreferencesClick = {
-                showPreferencesModal = true
-            }
+                topics = uiState.userProfile.topics,
+                exactMatchMode = uiState.userProfile.exactMatchMode,
+                onTopicsClick = { showTopicsModal = true },
+                onPreferencesClick = { showPreferencesModal = true }
         )
 
         // Username Footer
         UsernameFooter(
-            username = uiState.userProfile.username,
-            description = uiState.userProfile.description,
-            onUsernameClick = {
-                showUsernameModal = true
-            }
+                username = uiState.userProfile.username,
+                description = uiState.userProfile.description,
+                onUsernameClick = { showUsernameModal = true }
         )
     }
 
     // Modals
     if (showTopicsModal) {
         TopicEditModal(
-            currentTopics = uiState.userProfile.topics,
-            allCustomTopics = uiState.userProfile.allCustomTopics,
-            onTopicsChanged = { newTopics, allCustomTopics ->
-                viewModel.updateTopics(newTopics, allCustomTopics)
-            },
-            onDismiss = { showTopicsModal = false }
+                currentTopics = uiState.userProfile.topics,
+                allCustomTopics = uiState.userProfile.allCustomTopics,
+                onTopicsChanged = { newTopics, allCustomTopics ->
+                    viewModel.updateTopics(newTopics, allCustomTopics)
+                },
+                onDismiss = { showTopicsModal = false }
         )
     }
 
     if (showPreferencesModal) {
         TopicPreferencesModal(
-            exactMatchMode = uiState.userProfile.exactMatchMode,
-            onPreferenceChanged = { exactMode ->
-                viewModel.updateExactMatchMode(exactMode)
-            },
-            onDismiss = { showPreferencesModal = false }
+                exactMatchMode = uiState.userProfile.exactMatchMode,
+                onPreferenceChanged = { exactMode -> viewModel.updateExactMatchMode(exactMode) },
+                onDismiss = { showPreferencesModal = false }
         )
     }
 
     if (showUsernameModal) {
         UsernameEditModal(
-            currentUsername = uiState.userProfile.username,
-            currentDescription = uiState.userProfile.description,
-            onUserInfoChanged = { newUsername, newDescription ->
-                viewModel.updateUsername(newUsername)
-                viewModel.updateDescription(newDescription)
-            },
-            onDismiss = { showUsernameModal = false }
+                currentUsername = uiState.userProfile.username,
+                currentDescription = uiState.userProfile.description,
+                onUserInfoChanged = { newUsername, newDescription ->
+                    viewModel.updateUsername(newUsername)
+                    viewModel.updateDescription(newDescription)
+                },
+                onDismiss = { showUsernameModal = false }
         )
     }
 
-    selectedUser?.let { user ->
-        UserDetailModal(
-            user = user,
-            onDismiss = { selectedUser = null }
-        )
-    }
+    selectedUser?.let { user -> UserDetailModal(user = user, onDismiss = { selectedUser = null }) }
 }
 
 @Composable
-fun StatusBar(
-    nearbyUserCount: Int,
-    isScanning: Boolean,
-    onToggleScanning: () -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = BitalkAccent
-    ) {
+fun StatusBar(nearbyUserCount: Int, isScanning: Boolean, onToggleScanning: () -> Unit) {
+    Surface(modifier = Modifier.fillMaxWidth(), color = BitalkAccent) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Bitalk")
-                    }
-                    if (isScanning) {
-                        append(" - Scanning: $nearbyUserCount nearby users")
-                    } else {
-                        append(" - Paused")
-                    }
-                },
-                fontSize = 18.sp,
-                color = Color.White
+                    text =
+                            buildAnnotatedString {
+                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                    append("Bitalk")
+                                }
+                                if (isScanning) {
+                                    append(" - Scanning: $nearbyUserCount nearby users")
+                                } else {
+                                    append(" - Paused")
+                                }
+                            },
+                    fontSize = 18.sp,
+                    color = Color.White
             )
 
-            IconButton(
-                onClick = onToggleScanning,
-                modifier = Modifier.size(32.dp)
-            ) {
+            IconButton(onClick = onToggleScanning, modifier = Modifier.size(32.dp)) {
                 Icon(
-                    imageVector = if (isScanning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                    contentDescription = if (isScanning) "Pause" else "Play",
-                    tint = Color.White
+                        imageVector =
+                                if (isScanning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                        contentDescription = if (isScanning) "Pause" else "Play",
+                        tint = Color.White
                 )
             }
         }
@@ -224,83 +196,131 @@ fun StatusBar(
 }
 
 @Composable
-fun BubbleArea(
-    nearbyUsers: List<NearbyUser>,
-    onUserClick: (NearbyUser) -> Unit
-) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Bottom,
-        contentPadding = PaddingValues(16.dp)
-    ) {
-        items(nearbyUsers.sortedBy { it.estimatedDistance }) { user ->
-            UserBubble(
-                user = user,
-                onClick = { onUserClick(user) }
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+fun BubbleArea(nearbyUsers: List<NearbyUser>, onUserClick: (NearbyUser) -> Unit) {
+    // Sort users by RSSI (strongest signal first = closest)
+    val sortedUsers = nearbyUsers.sortedByDescending { it.rssi }
+    
+    Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        sortedUsers.forEachIndexed { index, user ->
+            val isSingle = sortedUsers.size == 1
+            
+            // Position bubbles: biggest (closest) in center, others around
+            val alignment = when {
+                sortedUsers.size == 1 -> Alignment.Center
+                index == 0 -> Alignment.Center // Biggest bubble in center
+                index % 4 == 1 -> Alignment.TopStart
+                index % 4 == 2 -> Alignment.TopEnd
+                index % 4 == 3 -> Alignment.BottomStart
+                else -> Alignment.BottomEnd
+            }
+            
+            Box(
+                modifier = Modifier.align(alignment),
+                contentAlignment = Alignment.Center
+            ) {
+                UserBubble(
+                    user = user, 
+                    onClick = { onUserClick(user) },
+                    isSingle = isSingle
+                )
+            }
         }
     }
 }
 
 @Composable
-fun UserBubble(
-    user: NearbyUser,
-    onClick: () -> Unit
-) {
-    // Calculate bubble size based on distance
-    val baseSize = 120.dp
-    val sizeMultiplier = when {
-        user.estimatedDistance < 1.0 -> 1.2f
-        user.estimatedDistance < 3.0 -> 1.0f
-        user.estimatedDistance < 6.0 -> 0.8f
-        else -> 0.6f
+fun UserBubble(user: NearbyUser, onClick: () -> Unit, isSingle: Boolean = false) {
+    // RSSI-based scaling parameters (more limited range to prevent text cutoff)
+    val rssi = user.rssi
+    val minBubbleSize = 110.dp  // Increased minimum to prevent text cutoff
+    val maxBubbleSize = 140.dp  // Smaller range
+    val minFontSize = 15.sp     // Slightly larger minimum font
+    val maxFontSize = 20.sp     // Reduced max font for better fit
+    
+    // RSSI-based bubble scaling (limited range)
+    val bubbleMultiplier = when {
+        rssi > -50 -> 1.0f          // Very Close - full size
+        rssi > -70 -> 0.9f          // Close - 90% size  
+        rssi > -85 -> 0.8f          // Far - 80% size
+        else -> 0.75f               // Very Far - 75% size (more conservative)
     }
-    val bubbleSize = baseSize * sizeMultiplier
+    
+    // Independent font scaling (even more conservative)
+    val fontMultiplier = when {
+        rssi > -50 -> 1.0f          // Very Close - full font
+        rssi > -70 -> 0.95f         // Close - 95% font
+        rssi > -85 -> 0.9f          // Far - 90% font  
+        else -> 0.85f               // Very Far - 85% font (still readable)
+    }
+    
+    // Apply single bubble boost
+    val finalBubbleMultiplier = if (isSingle) bubbleMultiplier * 1.25f else bubbleMultiplier
+    val finalFontMultiplier = if (isSingle) fontMultiplier * 1.15f else fontMultiplier
+    
+    // Calculate final sizes
+    val bubbleSize = if (maxBubbleSize * finalBubbleMultiplier > minBubbleSize) {
+        maxBubbleSize * finalBubbleMultiplier
+    } else {
+        minBubbleSize
+    }
+    
+    val usernameFontSize = if ((maxFontSize.value * finalFontMultiplier).sp > minFontSize) {
+        (maxFontSize.value * finalFontMultiplier).sp
+    } else {
+        minFontSize
+    }
+    
+    val topicsFontSize = if ((maxFontSize.value * 0.9f * finalFontMultiplier).sp > minFontSize) {
+        (maxFontSize.value * 0.9f * finalFontMultiplier).sp
+    } else {
+        minFontSize
+    }
+    
+    val distanceFontSize = if ((maxFontSize.value * 0.6f * finalFontMultiplier).sp > (minFontSize.value * 0.8f).sp) {
+        (maxFontSize.value * 0.6f * finalFontMultiplier).sp
+    } else {
+        (minFontSize.value * 0.8f).sp
+    }
 
     Card(
-        modifier = Modifier
-            .size(bubbleSize)
-            .clickable { onClick() },
-        shape = CircleShape,
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = androidx.compose.foundation.BorderStroke(2.dp, BitalkAccent)
+            modifier = Modifier.size(bubbleSize).clickable { onClick() },
+            shape = CircleShape,
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            border = androidx.compose.foundation.BorderStroke(2.dp, BitalkAccent)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                modifier = Modifier.fillMaxSize().padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
         ) {
             // Username
             Text(
-                text = user.username,
-                fontSize = 18.sp,
-                color = BitalkAccent,
-                textAlign = TextAlign.Center
+                    text = user.username,
+                    fontSize = usernameFontSize,
+                    color = BitalkAccent,
+                    textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Description
+            // Matching topics
             Text(
-                text = user.description,
-                fontSize = 18.sp,
-                color = Color.Gray,
-                textAlign = TextAlign.Center,
-                maxLines = 2,
-                lineHeight = 18.sp
+                    text = user.matchingTopics.joinToString(", "),
+                    fontSize = topicsFontSize,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    lineHeight = topicsFontSize * 1.1f
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             // Distance
             Text(
-                text = user.formattedDistance,
-                fontSize = 11.sp,
-                color = BitalkAccent,
-                textAlign = TextAlign.Center
+                    text = user.formattedDistance,
+                    fontSize = distanceFontSize,
+                    color = BitalkAccent,
+                    textAlign = TextAlign.Center
             )
         }
     }
@@ -309,60 +329,43 @@ fun UserBubble(
 @Composable
 fun EmptyState(isScanning: Boolean) {
     Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = if (isScanning) "Waiting for interesting people..." else "Scanning paused",
-            fontSize = 18.sp,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center
+                text = if (isScanning) "Waiting for interesting people..." else "Scanning paused",
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
         )
     }
 }
 
 @Composable
 fun TopicsSection(
-    topics: List<String>,
-    exactMatchMode: Boolean,
-    onTopicsClick: () -> Unit,
-    onPreferencesClick: () -> Unit
+        topics: List<String>,
+        exactMatchMode: Boolean,
+        onTopicsClick: () -> Unit,
+        onPreferencesClick: () -> Unit
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface
-    ) {
+    Surface(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
         ) {
             // Topics chips
             Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable { onTopicsClick() },
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.weight(1f).clickable { onTopicsClick() },
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 if (topics.isEmpty()) {
-                    Text(
-                        text = "Tap to add topics",
-                        fontSize = 18.sp,
-                        color = Color.Gray
-                    )
+                    Text(text = "Tap to add topics", fontSize = 18.sp, color = Color.Gray)
                 } else {
-                    topics.take(3).forEach { topic ->
-                        TopicChip(topic = topic)
-                    }
+                    topics.take(3).forEach { topic -> TopicChip(topic = topic) }
                     if (topics.size > 3) {
-                        Text(
-                            text = "+${topics.size - 3}",
-                            fontSize = 18.sp,
-                            color = Color.Gray
-                        )
+                        Text(text = "+${topics.size - 3}", fontSize = 18.sp, color = Color.Gray)
                     }
                 }
             }
@@ -371,18 +374,18 @@ fun TopicsSection(
             Box {
                 IconButton(onClick = onPreferencesClick) {
                     Icon(
-                        imageVector = Icons.Filled.Settings,
-                        contentDescription = "Preferences",
-                        tint = Color.Gray
+                            imageVector = Icons.Filled.Settings,
+                            contentDescription = "Preferences",
+                            tint = Color.Gray
                     )
                 }
 
                 if (exactMatchMode) {
                     Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .background(BitalkAccent, CircleShape)
-                            .align(Alignment.TopEnd)
+                            modifier =
+                                    Modifier.size(8.dp)
+                                            .background(BitalkAccent, CircleShape)
+                                            .align(Alignment.TopEnd)
                     )
                 }
             }
@@ -393,38 +396,31 @@ fun TopicsSection(
 @Composable
 fun TopicChip(topic: String) {
     Surface(
-        shape = RoundedCornerShape(12.dp),
-        color = BitalkAccent.copy(alpha = 0.1f),
-        border = androidx.compose.foundation.BorderStroke(1.dp, BitalkAccent)
+            shape = RoundedCornerShape(12.dp),
+            color = BitalkAccent.copy(alpha = 0.1f),
+            border = androidx.compose.foundation.BorderStroke(1.dp, BitalkAccent)
     ) {
         Text(
-            text = topic,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            fontSize = 18.sp,
-            color = MaterialTheme.colorScheme.onSurface
+                text = topic,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
 
 @Composable
-fun UsernameFooter(
-    username: String,
-    description: String,
-    onUsernameClick: () -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface
-    ) {
+fun UsernameFooter(username: String, description: String, onUsernameClick: () -> Unit) {
+    Surface(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface) {
         Text(
-            text = "$username: $description",
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onUsernameClick() }
-                .padding(top = 0.dp, bottom = 16.dp, start = 16.dp, end = 16.dp),
-            fontSize = 18.sp,
-            color = Color.Gray,
-            textAlign = TextAlign.Center
+                text = "$username: $description",
+                modifier =
+                        Modifier.fillMaxWidth()
+                                .clickable { onUsernameClick() }
+                                .padding(top = 0.dp, bottom = 16.dp, start = 16.dp, end = 16.dp),
+                fontSize = 18.sp,
+                color = Color.Gray,
+                textAlign = TextAlign.Center
         )
     }
 }
