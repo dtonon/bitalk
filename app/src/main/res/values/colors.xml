@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Bitalk brand colors -->
+    <color name="bitalk_accent">#e32a6d</color>
+    <color name="bitalk_accent_dark">#c2185b</color>
+    <color name="bitalk_accent_light">#f48fb1</color>
+    
+    <!-- Neutral colors -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="gray_light">#F5F5F5</color>
+    <color name="gray_medium">#9E9E9E</color>
+    <color name="gray_dark">#424242</color>
+    
+    <!-- Status colors -->
+    <color name="status_bar_background">#E0E0E0</color>
+    <color name="bubble_background">#FFFFFF</color>
+    <color name="bubble_border">@color/bitalk_accent</color>
+</resources>
