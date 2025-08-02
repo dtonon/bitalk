@@ -148,7 +148,7 @@ fun TopicChip(
             text = "$topic",
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             fontSize = 18.sp,
-            color = if (isSelected) BitalkAccent else Color.Gray
+            color = if (isSelected) MaterialTheme.colorScheme.onSurface else Color.Gray
         )
     }
 }

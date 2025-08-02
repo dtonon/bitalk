@@ -315,7 +315,7 @@ fun EmptyState(isScanning: Boolean) {
         Text(
             text = if (isScanning) "Waiting for interesting people..." else "Scanning paused",
             fontSize = 18.sp,
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )
     }

@@ -144,7 +144,7 @@ fun UserDetailModal(
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                 fontSize = 18.sp,
                                 color = if (user.matchingTopics.contains(topic)) {
-                                    BitalkAccent
+                                    MaterialTheme.colorScheme.onSurface
                                 } else {
                                     Color.Gray
                                 }
