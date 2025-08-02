@@ -187,7 +187,7 @@ fun OnboardingPermissionsScreen(
                     )
                 ) {
                     Text(
-                        text = "Grant Permissions",
+                        text = stringResource(R.string.grant_permissions),
                         fontSize = 21.sp,
                         fontWeight = FontWeight.Medium
                     )

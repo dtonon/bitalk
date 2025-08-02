@@ -51,7 +51,7 @@ fun OnboardingWelcomeScreen(
         
         // Welcome description
         Text(
-            text = "Discover like-minded people nearby using Bluetooth mesh networking",
+            text = stringResource(R.string.onboarding_welcome_desc),
             fontSize = 21.sp,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),

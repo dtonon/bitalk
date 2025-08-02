@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -29,6 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
+import com.bitalk.android.R
 import com.bitalk.android.model.NearbyUser
 import com.bitalk.android.notification.NotificationClickHandler
 import com.bitalk.android.ui.components.*
@@ -334,7 +336,7 @@ fun EmptyState(isScanning: Boolean) {
             verticalArrangement = Arrangement.Center
     ) {
         Text(
-                text = if (isScanning) "Waiting for interesting people..." else "Scanning paused",
+                text = if (isScanning) stringResource(R.string.waiting_for_people) else stringResource(R.string.scanning_paused),
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center
@@ -361,7 +363,7 @@ fun TopicsSection(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 if (topics.isEmpty()) {
-                    Text(text = "Tap to add topics", fontSize = 18.sp, color = Color.Gray)
+                    Text(text = stringResource(R.string.tap_to_add_topics), fontSize = 18.sp, color = Color.Gray)
                 } else {
                     topics.take(3).forEach { topic -> TopicChip(topic = topic) }
                     if (topics.size > 3) {

@@ -108,7 +108,7 @@ fun TopicEditModal(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Edit Topics",
+                        text = stringResource(R.string.edit_topics),
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = BitalkAccent
@@ -156,7 +156,7 @@ fun TopicEditModal(
                             OutlinedTextField(
                                 value = customTopic,
                                 onValueChange = { customTopic = it },
-                                label = { Text("Custom Topic") },
+                                label = { Text(stringResource(R.string.custom_topic)) },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .focusRequester(focusRequester),
@@ -176,7 +176,7 @@ fun TopicEditModal(
                                             }
                                         }
                                     ) {
-                                        Text("Add")
+                                        Text(stringResource(R.string.add_button))
                                     }
                                 },
                                 colors = OutlinedTextFieldDefaults.colors(
@@ -200,7 +200,7 @@ fun TopicEditModal(
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Add Custom Topic")
+                                Text(stringResource(R.string.add_custom_topic))
                             }
                         }
                     }

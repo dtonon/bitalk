@@ -103,7 +103,7 @@ fun TopicPreferencesModal(
                         }
 
                         Text(
-                            text = "Matches partial topics (e.g., \"art\" matches \"artistic\", \"pop-art\")",
+                            text = stringResource(R.string.partial_matching_desc),
                             fontSize = 18.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                             modifier = Modifier.padding(start = 40.dp)
@@ -156,7 +156,7 @@ fun TopicPreferencesModal(
                         }
 
                         Text(
-                            text = "Only matches identical topics (e.g., \"art\" only matches \"art\")",
+                            text = stringResource(R.string.exact_matching_desc),
                             fontSize = 18.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                             modifier = Modifier.padding(start = 40.dp)

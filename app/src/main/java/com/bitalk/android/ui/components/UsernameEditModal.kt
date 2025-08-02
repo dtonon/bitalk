@@ -54,7 +54,7 @@ fun UsernameEditModal(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Change user info",
+                        text = stringResource(R.string.change_user_info),
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = BitalkAccent
@@ -74,8 +74,8 @@ fun UsernameEditModal(
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
-                    label = { Text("Username") },
-                    placeholder = { Text("e.g., anon123") },
+                    label = { Text(stringResource(R.string.username)) },
+                    placeholder = { Text(stringResource(R.string.username_placeholder)) },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.None
@@ -85,7 +85,7 @@ fun UsernameEditModal(
                     supportingText = {
                         if (username.isNotBlank() && !isUsernameValid) {
                             Text(
-                                text = "Username must be 3-20 characters, letters, numbers, and underscores only",
+                                text = stringResource(R.string.username_validation_error),
                                 color = MaterialTheme.colorScheme.error,
                                 fontSize = 16.sp
                             )
@@ -103,8 +103,8 @@ fun UsernameEditModal(
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Description") },
-                    placeholder = { Text("e.g., yellow shirt and sunglasses") },
+                    label = { Text(stringResource(R.string.description)) },
+                    placeholder = { Text(stringResource(R.string.description_placeholder)) },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences

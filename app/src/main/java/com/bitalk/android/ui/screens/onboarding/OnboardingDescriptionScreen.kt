@@ -88,8 +88,8 @@ fun OnboardingDescriptionScreen(
                 description = it
                 viewModel.updateDescription(it)
             },
-            label = { Text("Description") },
-            placeholder = { Text("e.g., yellow shirt and sunglasses") },
+            label = { Text(stringResource(R.string.description)) },
+            placeholder = { Text(stringResource(R.string.description_placeholder)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRequester(focusRequester),

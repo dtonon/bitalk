@@ -11,11 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.bitalk.android.R
 import com.bitalk.android.model.NearbyUser
 import com.bitalk.android.ui.theme.BitalkAccent
 import java.text.SimpleDateFormat
@@ -147,7 +149,7 @@ fun UserDetailModal(
                 ) {
                     Column {
                         Text(
-                            text = "First seen",
+                            text = stringResource(R.string.first_seen),
                             fontSize = 16.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
@@ -160,7 +162,7 @@ fun UserDetailModal(
 
                     Column {
                         Text(
-                            text = "Duration",
+                            text = stringResource(R.string.duration),
                             fontSize = 16.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
@@ -173,7 +175,7 @@ fun UserDetailModal(
 
                     Column {
                         Text(
-                            text = "Signal",
+                            text = stringResource(R.string.signal),
                             fontSize = 16.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
@@ -195,7 +197,7 @@ fun UserDetailModal(
                         containerColor = BitalkAccent
                     )
                 ) {
-                    Text("Close")
+                    Text(stringResource(R.string.close))
                 }
             }
         }
