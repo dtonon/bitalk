@@ -8,6 +8,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,9 +28,12 @@ fun OnboardingDescriptionScreen(
 ) {
     val viewModel: OnboardingViewModel = viewModel()
     val context = LocalContext.current
+    val focusRequester = remember { FocusRequester() }
     
     LaunchedEffect(Unit) {
         viewModel.initialize(context)
+        // Auto-focus the input field when screen loads
+        focusRequester.requestFocus()
     }
     
     val uiState by viewModel.uiState.collectAsState()
@@ -85,7 +90,9 @@ fun OnboardingDescriptionScreen(
             },
             label = { Text("Description") },
             placeholder = { Text("e.g., yellow shirt and sunglasses") },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester),
             keyboardOptions = KeyboardOptions(
                 capitalization = KeyboardCapitalization.Sentences
             ),
