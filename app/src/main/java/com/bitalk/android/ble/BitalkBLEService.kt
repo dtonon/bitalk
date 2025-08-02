@@ -75,7 +75,7 @@ class BitalkBLEService(private val context: Context) {
         userProfile = profile
         isActive = true
         
-        Log.i(TAG, "Starting Bitalk BLE services for user: ${profile.username}")
+        Log.i(TAG, "Starting Bitalk BLE services for user: ${profile.username} with topics: ${profile.topics}")
         
         // Start GATT server for data exchange
         startGattServer()
@@ -160,14 +160,29 @@ class BitalkBLEService(private val context: Context) {
                     offset: Int,
                     characteristic: BluetoothGattCharacteristic?
                 ) {
+                    Log.d(TAG, "GATT read request from ${device?.address} for characteristic ${characteristic?.uuid}, offset=$offset")
                     if (characteristic?.uuid == BITALK_CHARACTERISTIC_UUID) {
                         val broadcast = userProfile?.let { 
                             TopicBroadcast(it.username, it.description, it.topics)
                         }
-                        val data = broadcast?.toByteArray() ?: ByteArray(0)
+                        val allData = broadcast?.toByteArray() ?: ByteArray(0)
+                        
+                        Log.d(TAG, "Full broadcast data size: ${allData.size} bytes for ${broadcast?.username}")
+                        
+                        // Handle offset for large data
+                        val responseData = if (offset >= allData.size) {
+                            Log.w(TAG, "Offset $offset >= data size ${allData.size}, sending empty response")
+                            ByteArray(0)
+                        } else {
+                            val remainingSize = allData.size - offset
+                            val chunkSize = minOf(remainingSize, 512) // BLE characteristic max size
+                            allData.copyOfRange(offset, offset + chunkSize)
+                        }
+                        
+                        Log.d(TAG, "Sending ${responseData.size} bytes to ${device?.address} (offset=$offset)")
                         
                         try {
-                            gattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, data)
+                            gattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, responseData)
                         } catch (e: SecurityException) {
                             Log.w(TAG, "Permission denied sending GATT response: ${e.message}")
                         }
@@ -354,8 +369,16 @@ class BitalkBLEService(private val context: Context) {
                     status: Int
                 ) {
                     if (status == BluetoothGatt.GATT_SUCCESS && characteristic?.uuid == BITALK_CHARACTERISTIC_UUID) {
-                        val data = characteristic.value
-                        processBroadcastData(device.address, data, rssi)
+                        val data = characteristic.value ?: ByteArray(0)
+                        Log.d(TAG, "Read ${data.size} bytes from ${device.address}")
+                        
+                        if (data.isNotEmpty()) {
+                            processBroadcastData(device.address, data, rssi)
+                        } else {
+                            Log.w(TAG, "Received empty data from ${device.address}")
+                        }
+                    } else {
+                        Log.w(TAG, "Failed to read characteristic from ${device.address}, status: $status")
                     }
                     gatt?.disconnect()
                 }
@@ -372,15 +395,38 @@ class BitalkBLEService(private val context: Context) {
      * Process received broadcast data
      */
     private fun processBroadcastData(deviceAddress: String, data: ByteArray, rssi: Int) {
-        val broadcast = TopicBroadcast.fromByteArray(data) ?: return
-        val currentProfile = userProfile ?: return
+        Log.d(TAG, "Processing broadcast data from $deviceAddress, data size: ${data.size}")
+        
+        val broadcast = TopicBroadcast.fromByteArray(data)
+        if (broadcast == null) {
+            Log.w(TAG, "Failed to parse broadcast data from $deviceAddress")
+            return
+        }
+        
+        Log.d(TAG, "Received broadcast from ${broadcast.username}: topics=${broadcast.topics}")
+        
+        val currentProfile = userProfile
+        if (currentProfile == null) {
+            Log.w(TAG, "No user profile set, ignoring broadcast")
+            return
+        }
+        
+        Log.d(TAG, "Current user: ${currentProfile.username} with topics: ${currentProfile.topics}")
         
         // Skip our own broadcasts
-        if (broadcast.username == currentProfile.username) return
+        if (broadcast.username == currentProfile.username) {
+            Log.d(TAG, "Skipping own broadcast from ${broadcast.username}")
+            return
+        }
         
         // Check for topic matches
         val matchingTopics = TopicMatcher.findMatchingTopics(currentProfile, broadcast)
-        if (matchingTopics.isEmpty()) return
+        Log.d(TAG, "Topic matching result: $matchingTopics (exactMode: ${currentProfile.exactMatchMode})")
+        
+        if (matchingTopics.isEmpty()) {
+            Log.d(TAG, "No matching topics found with ${broadcast.username}")
+            return
+        }
         
         // Calculate distance
         val filter = rssiFilters.getOrPut(deviceAddress) { DistanceCalculator.RSSIFilter() }
@@ -402,14 +448,16 @@ class BitalkBLEService(private val context: Context) {
         val isNewUser = !nearbyUsers.containsKey(deviceAddress)
         nearbyUsers[deviceAddress] = nearbyUser
         
+        Log.i(TAG, "*** MATCH FOUND *** User ${broadcast.username} at ${nearbyUser.formattedDistance} with matching topics: $matchingTopics")
+        
         // Notify delegate
         if (isNewUser) {
+            Log.d(TAG, "Notifying delegate of new user: ${broadcast.username}")
             delegate?.onUserDiscovered(nearbyUser)
         } else {
+            Log.d(TAG, "Notifying delegate of updated user: ${broadcast.username}")
             delegate?.onUserUpdated(nearbyUser)
         }
-        
-        Log.d(TAG, "User ${broadcast.username} at ${nearbyUser.formattedDistance} with topics: $matchingTopics")
     }
 }
 

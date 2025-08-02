@@ -22,11 +22,16 @@ object TopicMatcher {
         val userTopics = userProfile.topics.map { it.lowercase() }
         val broadcastTopics = broadcast.topics.map { it.lowercase() }
         
-        return if (userProfile.exactMatchMode) {
+        android.util.Log.d("TopicMatcher", "Matching user topics $userTopics vs broadcast topics $broadcastTopics (exactMode: ${userProfile.exactMatchMode})")
+        
+        val result = if (userProfile.exactMatchMode) {
             findExactMatches(userTopics, broadcastTopics)
         } else {
             findPartialMatches(userTopics, broadcastTopics)
         }
+        
+        android.util.Log.d("TopicMatcher", "Match result: $result")
+        return result
     }
     
     /**
