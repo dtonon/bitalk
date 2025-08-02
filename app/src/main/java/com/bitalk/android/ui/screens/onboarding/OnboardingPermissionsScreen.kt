@@ -36,11 +36,11 @@ fun OnboardingPermissionsScreen(
 ) {
     val viewModel: OnboardingViewModel = viewModel()
     val context = LocalContext.current
-    
+
     LaunchedEffect(Unit) {
         viewModel.initialize(context)
     }
-    
+
     // Required permissions
     val permissions = remember {
         buildList {
@@ -59,9 +59,9 @@ fun OnboardingPermissionsScreen(
             }
         }
     }
-    
+
     val multiplePermissionsState = rememberMultiplePermissionsState(permissions)
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -78,12 +78,12 @@ fun OnboardingPermissionsScreen(
                     contentDescription = "Back"
                 )
             }
-            
+
             Spacer(modifier = Modifier.weight(1f))
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // Title
         Text(
             text = stringResource(R.string.onboarding_permissions_title),
@@ -91,9 +91,9 @@ fun OnboardingPermissionsScreen(
             fontWeight = FontWeight.Bold,
             color = BitalkAccent
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         // Subtitle
         Text(
             text = stringResource(R.string.onboarding_permissions_subtitle),
@@ -101,9 +101,9 @@ fun OnboardingPermissionsScreen(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             lineHeight = 20.sp
         )
-        
+
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         // Permissions list
         LazyColumn(
             modifier = Modifier.weight(1f),
@@ -113,35 +113,35 @@ fun OnboardingPermissionsScreen(
                 PermissionItem(
                     title = stringResource(R.string.permission_bluetooth),
                     description = stringResource(R.string.permission_bluetooth_desc),
-                    isGranted = multiplePermissionsState.permissions.filter { 
-                        it.permission.contains("BLUETOOTH") 
+                    isGranted = multiplePermissionsState.permissions.filter {
+                        it.permission.contains("BLUETOOTH")
                     }.all { it.status == PermissionStatus.Granted }
                 )
             }
-            
+
             item {
                 PermissionItem(
                     title = stringResource(R.string.permission_location),
                     description = stringResource(R.string.permission_location_desc),
-                    isGranted = multiplePermissionsState.permissions.filter { 
-                        it.permission.contains("LOCATION") 
+                    isGranted = multiplePermissionsState.permissions.filter {
+                        it.permission.contains("LOCATION")
                     }.all { it.status == PermissionStatus.Granted }
                 )
             }
-            
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 item {
                     PermissionItem(
                         title = stringResource(R.string.permission_notifications),
                         description = stringResource(R.string.permission_notifications_desc),
-                        isGranted = multiplePermissionsState.permissions.any { 
-                            it.permission == Manifest.permission.POST_NOTIFICATIONS && 
-                            it.status == PermissionStatus.Granted 
+                        isGranted = multiplePermissionsState.permissions.any {
+                            it.permission == Manifest.permission.POST_NOTIFICATIONS &&
+                            it.status == PermissionStatus.Granted
                         }
                     )
                 }
             }
-            
+
             item {
                 PermissionItem(
                     title = stringResource(R.string.permission_battery),
@@ -150,9 +150,9 @@ fun OnboardingPermissionsScreen(
                 )
             }
         }
-        
+
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         // Action buttons
         if (multiplePermissionsState.allPermissionsGranted) {
             Button(
@@ -192,21 +192,7 @@ fun OnboardingPermissionsScreen(
                         fontWeight = FontWeight.Medium
                     )
                 }
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                OutlinedButton(
-                    onClick = {
-                        // Open app settings
-                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                            data = Uri.fromParts("package", context.packageName, null)
-                        }
-                        context.startActivity(intent)
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Open Settings")
-                }
+
             }
         }
     }
@@ -240,16 +226,16 @@ fun PermissionItem(
                 tint = if (isGranted) Color(0xFF4CAF50) else Color(0xFFFF9800),
                 modifier = Modifier.size(24.dp)
             )
-            
+
             Spacer(modifier = Modifier.width(12.dp))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
                     fontSize = 21.sp,
                     fontWeight = FontWeight.Medium
                 )
-                
+
                 Text(
                     text = description,
                     fontSize = 18.sp,
