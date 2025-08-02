@@ -87,7 +87,7 @@ fun OnboardingPermissionsScreen(
         // Title
         Text(
             text = stringResource(R.string.onboarding_permissions_title),
-            fontSize = 24.sp,
+            fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             color = BitalkAccent
         )
@@ -97,7 +97,7 @@ fun OnboardingPermissionsScreen(
         // Subtitle
         Text(
             text = stringResource(R.string.onboarding_permissions_subtitle),
-            fontSize = 14.sp,
+            fontSize = 18.sp,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             lineHeight = 20.sp
         )
@@ -169,7 +169,7 @@ fun OnboardingPermissionsScreen(
             ) {
                 Text(
                     text = stringResource(R.string.done),
-                    fontSize = 16.sp,
+                    fontSize = 21.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -188,7 +188,7 @@ fun OnboardingPermissionsScreen(
                 ) {
                     Text(
                         text = "Grant Permissions",
-                        fontSize = 16.sp,
+                        fontSize = 21.sp,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -246,13 +246,13 @@ fun PermissionItem(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
-                    fontSize = 16.sp,
+                    fontSize = 21.sp,
                     fontWeight = FontWeight.Medium
                 )
                 
                 Text(
                     text = description,
-                    fontSize = 14.sp,
+                    fontSize = 18.sp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     lineHeight = 18.sp
                 )

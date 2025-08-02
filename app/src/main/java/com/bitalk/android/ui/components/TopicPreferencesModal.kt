@@ -23,7 +23,7 @@ fun TopicPreferencesModal(
     onDismiss: () -> Unit
 ) {
     var selectedMode by remember { mutableStateOf(exactMatchMode) }
-    
+
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -45,11 +45,11 @@ fun TopicPreferencesModal(
                 ) {
                     Text(
                         text = stringResource(R.string.topic_preferences),
-                        fontSize = 20.sp,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = BitalkAccent
                     )
-                    
+
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Filled.Close,
@@ -57,28 +57,28 @@ fun TopicPreferencesModal(
                         )
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(24.dp))
-                
+
                 // Matching mode options
                 Text(
                     text = "Topic Matching Mode",
-                    fontSize = 16.sp,
+                    fontSize = 21.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 // Partial matching option
                 Card(
                     modifier = Modifier
                         .fillMaxWidth(),
                     onClick = { selectedMode = false },
                     colors = CardDefaults.cardColors(
-                        containerColor = if (!selectedMode) 
-                            BitalkAccent.copy(alpha = 0.1f) 
-                        else 
+                        containerColor = if (!selectedMode)
+                            BitalkAccent.copy(alpha = 0.1f)
+                        else
                             MaterialTheme.colorScheme.surface
                     ),
                     border = androidx.compose.foundation.BorderStroke(
@@ -101,37 +101,37 @@ fun TopicPreferencesModal(
                                     selectedColor = BitalkAccent
                                 )
                             )
-                            
+
                             Spacer(modifier = Modifier.width(8.dp))
-                            
+
                             Text(
                                 text = stringResource(R.string.partial_matching),
-                                fontSize = 16.sp,
+                                fontSize = 21.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = if (!selectedMode) BitalkAccent else MaterialTheme.colorScheme.onSurface
                             )
                         }
-                        
+
                         Text(
                             text = "Matches partial topics (e.g., \"art\" matches \"artistic\", \"pop-art\")",
-                            fontSize = 14.sp,
+                            fontSize = 18.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                             modifier = Modifier.padding(start = 40.dp)
                         )
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(12.dp))
-                
+
                 // Exact matching option
                 Card(
                     modifier = Modifier
                         .fillMaxWidth(),
                     onClick = { selectedMode = true },
                     colors = CardDefaults.cardColors(
-                        containerColor = if (selectedMode) 
-                            BitalkAccent.copy(alpha = 0.1f) 
-                        else 
+                        containerColor = if (selectedMode)
+                            BitalkAccent.copy(alpha = 0.1f)
+                        else
                             MaterialTheme.colorScheme.surface
                     ),
                     border = androidx.compose.foundation.BorderStroke(
@@ -154,28 +154,28 @@ fun TopicPreferencesModal(
                                     selectedColor = BitalkAccent
                                 )
                             )
-                            
+
                             Spacer(modifier = Modifier.width(8.dp))
-                            
+
                             Text(
                                 text = stringResource(R.string.exact_matching),
-                                fontSize = 16.sp,
+                                fontSize = 21.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = if (selectedMode) BitalkAccent else MaterialTheme.colorScheme.onSurface
                             )
                         }
-                        
+
                         Text(
                             text = "Only matches identical topics (e.g., \"bitcoin\" only matches \"bitcoin\")",
-                            fontSize = 14.sp,
+                            fontSize = 18.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                             modifier = Modifier.padding(start = 40.dp)
                         )
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(24.dp))
-                
+
                 // Action buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -185,9 +185,12 @@ fun TopicPreferencesModal(
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text(stringResource(R.string.cancel))
+                        Text(
+                            text = stringResource(R.string.cancel),
+                            fontSize = 18.sp
+                        )
                     }
-                    
+
                     Button(
                         onClick = {
                             onPreferenceChanged(selectedMode)
@@ -198,7 +201,11 @@ fun TopicPreferencesModal(
                             containerColor = BitalkAccent
                         )
                     ) {
-                        Text(stringResource(R.string.save))
+                        Text(
+                            text = stringResource(R.string.save),
+                            fontSize = 18.sp
+
+                        )
                     }
                 }
             }

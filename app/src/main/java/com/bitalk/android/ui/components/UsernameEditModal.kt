@@ -25,10 +25,10 @@ fun UsernameEditModal(
     onDismiss: () -> Unit
 ) {
     var username by remember { mutableStateOf(currentUsername) }
-    val isValid = username.isNotBlank() && 
-                  username.length in 3..20 && 
+    val isValid = username.isNotBlank() &&
+                  username.length in 3..20 &&
                   username.matches(Regex("^[a-zA-Z0-9_]+$"))
-    
+
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -50,11 +50,11 @@ fun UsernameEditModal(
                 ) {
                     Text(
                         text = stringResource(R.string.change_username),
-                        fontSize = 20.sp,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = BitalkAccent
                     )
-                    
+
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Filled.Close,
@@ -62,9 +62,9 @@ fun UsernameEditModal(
                         )
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(24.dp))
-                
+
                 // Username input
                 OutlinedTextField(
                     value = username,
@@ -75,18 +75,19 @@ fun UsernameEditModal(
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.None
                     ),
+                    textStyle = androidx.compose.ui.text.TextStyle(fontSize = 18.sp),
                     isError = username.isNotBlank() && !isValid,
                     supportingText = {
                         if (username.isNotBlank() && !isValid) {
                             Text(
                                 text = "Username must be 3-20 characters, letters, numbers, and underscores only",
                                 color = MaterialTheme.colorScheme.error,
-                                fontSize = 12.sp
+                                fontSize = 16.sp
                             )
                         } else {
                             Text(
                                 text = "Will appear as: bitalk/$username",
-                                fontSize = 12.sp,
+                                fontSize = 16.sp,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
                         }
@@ -96,9 +97,9 @@ fun UsernameEditModal(
                         focusedLabelColor = BitalkAccent
                     )
                 )
-                
+
                 Spacer(modifier = Modifier.height(24.dp))
-                
+
                 // Action buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -108,9 +109,12 @@ fun UsernameEditModal(
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text(stringResource(R.string.cancel))
+                        Text(
+                            text = stringResource(R.string.cancel),
+                            fontSize = 18.sp
+                        )
                     }
-                    
+
                     Button(
                         onClick = {
                             onUsernameChanged(username)
@@ -122,7 +126,11 @@ fun UsernameEditModal(
                             containerColor = BitalkAccent
                         )
                     ) {
-                        Text(stringResource(R.string.save))
+                        Text(
+                            text = stringResource(R.string.save),
+                            fontSize = 18.sp
+
+                        )
                     }
                 }
             }

@@ -67,7 +67,7 @@ fun OnboardingTopicsScreen(
         // Title
         Text(
             text = stringResource(R.string.onboarding_topics_title),
-            fontSize = 24.sp,
+            fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             color = BitalkAccent
         )
@@ -77,7 +77,7 @@ fun OnboardingTopicsScreen(
         // Subtitle
         Text(
             text = stringResource(R.string.onboarding_topics_subtitle),
-            fontSize = 14.sp,
+            fontSize = 18.sp,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             lineHeight = 20.sp
         )
@@ -87,7 +87,7 @@ fun OnboardingTopicsScreen(
         // Selected topics count
         Text(
             text = "Selected: ${uiState.selectedTopics.size}",
-            fontSize = 14.sp,
+            fontSize = 18.sp,
             fontWeight = FontWeight.Medium,
             color = BitalkAccent
         )
@@ -130,7 +130,7 @@ fun OnboardingTopicsScreen(
         ) {
             Text(
                 text = stringResource(R.string.next),
-                fontSize = 16.sp,
+                fontSize = 21.sp,
                 fontWeight = FontWeight.Medium
             )
         }
@@ -157,7 +157,7 @@ fun TopicChip(
         Text(
             text = "$topic",
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            fontSize = 14.sp,
+            fontSize = 18.sp,
             color = if (isSelected) BitalkAccent else Color.Gray
         )
     }

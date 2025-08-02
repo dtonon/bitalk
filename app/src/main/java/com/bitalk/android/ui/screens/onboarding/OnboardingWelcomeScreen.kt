@@ -32,7 +32,7 @@ fun OnboardingWelcomeScreen(
         ) {
             Text(
                 text = "🗨️",
-                fontSize = 64.sp
+                fontSize = 83.sp
             )
         }
         
@@ -41,7 +41,7 @@ fun OnboardingWelcomeScreen(
         // Welcome title
         Text(
             text = stringResource(R.string.onboarding_welcome),
-            fontSize = 28.sp,
+            fontSize = 36.sp,
             fontWeight = FontWeight.Bold,
             color = BitalkAccent,
             textAlign = TextAlign.Center
@@ -52,7 +52,7 @@ fun OnboardingWelcomeScreen(
         // Welcome description
         Text(
             text = "Discover like-minded people nearby using Bluetooth mesh networking",
-            fontSize = 16.sp,
+            fontSize = 21.sp,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             lineHeight = 22.sp
@@ -72,7 +72,7 @@ fun OnboardingWelcomeScreen(
         ) {
             Text(
                 text = stringResource(R.string.next),
-                fontSize = 16.sp,
+                fontSize = 21.sp,
                 fontWeight = FontWeight.Medium
             )
         }

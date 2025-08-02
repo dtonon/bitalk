@@ -34,20 +34,20 @@ import com.bitalk.android.ui.viewmodel.MainViewModel
 fun MainScreen() {
     val viewModel: MainViewModel = viewModel()
     val context = LocalContext.current
-    
+
     // Initialize ViewModel with context
     LaunchedEffect(Unit) {
         viewModel.initialize(context)
     }
-    
+
     val uiState by viewModel.uiState.collectAsState()
-    
+
     // Modal states
     var showTopicsModal by remember { mutableStateOf(false) }
     var showPreferencesModal by remember { mutableStateOf(false) }
     var showUsernameModal by remember { mutableStateOf(false) }
     var selectedUser by remember { mutableStateOf<NearbyUser?>(null) }
-    
+
     // Handle notification clicks
     LaunchedEffect(Unit) {
         // Check for any pending notification data first
@@ -65,7 +65,7 @@ fun MainScreen() {
             )
             selectedUser = userFromNotification
         }
-        
+
         // Set listener for future notification clicks
         NotificationClickHandler.setOnUserDataAvailable { userData ->
             val userFromNotification = NearbyUser(
@@ -82,7 +82,7 @@ fun MainScreen() {
             selectedUser = userFromNotification
         }
     }
-    
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -92,7 +92,7 @@ fun MainScreen() {
             isScanning = uiState.isScanning,
             onToggleScanning = { viewModel.toggleScanning() }
         )
-        
+
         // Main Content Area - Bubbles
         Box(
             modifier = Modifier.weight(1f),
@@ -109,7 +109,7 @@ fun MainScreen() {
                 )
             }
         }
-        
+
         // Topics Section
         TopicsSection(
             topics = uiState.userProfile.topics,
@@ -121,7 +121,7 @@ fun MainScreen() {
                 showPreferencesModal = true
             }
         )
-        
+
         // Username Footer
         UsernameFooter(
             username = uiState.userProfile.username,
@@ -130,7 +130,7 @@ fun MainScreen() {
             }
         )
     }
-    
+
     // Modals
     if (showTopicsModal) {
         TopicEditModal(
@@ -142,7 +142,7 @@ fun MainScreen() {
             onDismiss = { showTopicsModal = false }
         )
     }
-    
+
     if (showPreferencesModal) {
         TopicPreferencesModal(
             exactMatchMode = uiState.userProfile.exactMatchMode,
@@ -152,7 +152,7 @@ fun MainScreen() {
             onDismiss = { showPreferencesModal = false }
         )
     }
-    
+
     if (showUsernameModal) {
         UsernameEditModal(
             currentUsername = uiState.userProfile.username,
@@ -162,7 +162,7 @@ fun MainScreen() {
             onDismiss = { showUsernameModal = false }
         )
     }
-    
+
     selectedUser?.let { user ->
         UserDetailModal(
             user = user,
@@ -200,11 +200,11 @@ fun StatusBar(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = if (isScanning) "Scanning: $nearbyUserCount nearby users" else "Paused",
-                    fontSize = 14.sp,
+                    fontSize = 18.sp,
                     color = Color.Black
                 )
             }
-            
+
             IconButton(
                 onClick = onToggleScanning,
                 modifier = Modifier.size(32.dp)
@@ -253,7 +253,7 @@ fun UserBubble(
         else -> 0.6f
     }
     val bubbleSize = baseSize * sizeMultiplier
-    
+
     Card(
         modifier = Modifier
             .size(bubbleSize)
@@ -272,25 +272,25 @@ fun UserBubble(
             // Username
             Text(
                 text = user.username,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
                 color = BitalkAccent,
                 textAlign = TextAlign.Center
             )
-            
+
             Spacer(modifier = Modifier.height(4.dp))
-            
+
             // Description
             Text(
                 text = user.description,
-                fontSize = 12.sp,
+                fontSize = 18.sp,
                 color = Color.Gray,
                 textAlign = TextAlign.Center,
-                maxLines = 2
+                maxLines = 2,
+                lineHeight = 18.sp
             )
-            
+
             Spacer(modifier = Modifier.height(4.dp))
-            
+
             // Distance
             Text(
                 text = user.formattedDistance,
@@ -311,20 +311,20 @@ fun EmptyState(isScanning: Boolean) {
     ) {
         Text(
             text = if (isScanning) "Scanning for users..." else "Scanning paused",
-            fontSize = 16.sp,
+            fontSize = 22.sp,
             color = Color.Gray,
             textAlign = TextAlign.Center
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         Text(
             text = if (isScanning) {
                 "Make sure Bluetooth is enabled and you're in a public place"
             } else {
                 "Tap the play button to start scanning"
             },
-            fontSize = 12.sp,
+            fontSize = 18.sp,
             color = Color.Gray,
             textAlign = TextAlign.Center
         )
@@ -359,7 +359,7 @@ fun TopicsSection(
                 if (topics.isEmpty()) {
                     Text(
                         text = "Tap to add topics",
-                        fontSize = 14.sp,
+                        fontSize = 18.sp,
                         color = Color.Gray
                     )
                 } else {
@@ -369,13 +369,13 @@ fun TopicsSection(
                     if (topics.size > 3) {
                         Text(
                             text = "+${topics.size - 3}",
-                            fontSize = 12.sp,
+                            fontSize = 18.sp,
                             color = Color.Gray
                         )
                     }
                 }
             }
-            
+
             // Preferences icon with indicator
             Box {
                 IconButton(onClick = onPreferencesClick) {
@@ -385,7 +385,7 @@ fun TopicsSection(
                         tint = Color.Gray
                     )
                 }
-                
+
                 if (exactMatchMode) {
                     Box(
                         modifier = Modifier
@@ -409,7 +409,7 @@ fun TopicChip(topic: String) {
         Text(
             text = topic,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            fontSize = 12.sp,
+            fontSize = 18.sp,
             color = MaterialTheme.colorScheme.onSurface
         )
     }
@@ -430,7 +430,7 @@ fun UsernameFooter(
                 .fillMaxWidth()
                 .clickable { onUsernameClick() }
                 .padding(16.dp),
-            fontSize = 14.sp,
+            fontSize = 18.sp,
             color = Color.Gray,
             textAlign = TextAlign.Center
         )

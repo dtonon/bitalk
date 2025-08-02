@@ -42,10 +42,10 @@ fun TopicEditModal(
     var allCustomTopicsList by remember { mutableStateOf((allCustomTopics ?: emptyList()).toSet()) }
     var customTopic by remember { mutableStateOf("") }
     var showAddCustom by remember { mutableStateOf(false) }
-    
+
     val listState = rememberLazyListState()
     val focusRequester = remember { FocusRequester() }
-    
+
     // Create a stable list that maintains order and includes all custom topics (selected and unselected)
     val allTopics = remember(selectedTopics, allCustomTopicsList) {
         try {
@@ -53,12 +53,12 @@ fun TopicEditModal(
             val selectedDefaults = DefaultTopics.topics.filter { selectedTopics.contains(it) }
             val unselectedCustomTopics = allCustomTopicsList.filter { !selectedTopics.contains(it) }
             val unselectedDefaults = DefaultTopics.topics.filter { !selectedTopics.contains(it) }
-            
+
             // Combine and sort selected topics alphabetically (custom + default)
             val allSelectedTopics = (selectedCustomTopics + selectedDefaults).sorted()
             // Combine and sort unselected topics alphabetically (custom + default)
             val allUnselectedTopics = (unselectedCustomTopics + unselectedDefaults).sorted()
-            
+
             // Selected topics first, then unselected topics (both groups alphabetically sorted)
             allSelectedTopics + allUnselectedTopics
         } catch (e: Exception) {
@@ -66,14 +66,14 @@ fun TopicEditModal(
             DefaultTopics.topics
         }
     }
-    
+
     // Auto-scroll to top when custom topic is added
     LaunchedEffect(allCustomTopicsList.size) {
         if (allCustomTopicsList.isNotEmpty()) {
             listState.animateScrollToItem(0)
         }
     }
-    
+
     // Auto-focus when input appears
     LaunchedEffect(showAddCustom) {
         if (showAddCustom) {
@@ -85,7 +85,7 @@ fun TopicEditModal(
             }
         }
     }
-    
+
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier
@@ -109,11 +109,11 @@ fun TopicEditModal(
                 ) {
                     Text(
                         text = "Edit Topics",
-                        fontSize = 20.sp,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = BitalkAccent
                     )
-                    
+
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Filled.Close,
@@ -121,9 +121,9 @@ fun TopicEditModal(
                         )
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 // Topics list - maintains position, only changes selection state
                 LazyColumn(
                     state = listState,
@@ -133,7 +133,7 @@ fun TopicEditModal(
                     items(allTopics) { topic ->
                         val isSelected = selectedTopics.contains(topic)
                         val isCustom = !DefaultTopics.topics.contains(topic)
-                        
+
                         TopicSelectionItem(
                             topic = topic,
                             isSelected = isSelected,
@@ -147,11 +147,11 @@ fun TopicEditModal(
                             }
                         )
                     }
-                    
+
                     // Add custom topic
                     item {
                         Spacer(modifier = Modifier.height(8.dp))
-                        
+
                         if (showAddCustom) {
                             OutlinedTextField(
                                 value = customTopic,
@@ -163,6 +163,7 @@ fun TopicEditModal(
                                 keyboardOptions = KeyboardOptions(
                                     capitalization = KeyboardCapitalization.Words
                                 ),
+                                textStyle = androidx.compose.ui.text.TextStyle(fontSize = 18.sp),
                                 trailingIcon = {
                                     TextButton(
                                         onClick = {
@@ -183,12 +184,12 @@ fun TopicEditModal(
                                     focusedLabelColor = BitalkAccent
                                 )
                             )
-                            
+
                             // Add extra space below input
                             Spacer(modifier = Modifier.height(16.dp))
                         } else {
                             OutlinedButton(
-                                onClick = { 
+                                onClick = {
                                     showAddCustom = true
                                 },
                                 modifier = Modifier.fillMaxWidth()
@@ -204,9 +205,9 @@ fun TopicEditModal(
                         }
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 // Action buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -216,9 +217,12 @@ fun TopicEditModal(
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text(stringResource(R.string.cancel))
+                        Text(
+                            text = stringResource(R.string.cancel),
+                            fontSize = 18.sp
+                        )
                     }
-                    
+
                     Button(
                         onClick = {
                             onTopicsChanged(selectedTopics.toList(), allCustomTopicsList.toList())
@@ -229,7 +233,11 @@ fun TopicEditModal(
                             containerColor = BitalkAccent
                         )
                     ) {
-                        Text(stringResource(R.string.save))
+                        Text(
+                            text = stringResource(R.string.save),
+                            fontSize = 18.sp
+
+                        )
                     }
                 }
             }
@@ -264,11 +272,11 @@ fun TopicSelectionItem(
         ) {
             Text(
                 text = topic,
-                fontSize = 14.sp,
+                fontSize = 18.sp,
                 color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 modifier = Modifier.weight(1f)
             )
-            
+
             if (isSelected) {
                 Icon(
                     imageVector = Icons.Filled.Close,
