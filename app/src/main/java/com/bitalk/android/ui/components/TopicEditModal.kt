@@ -51,11 +51,16 @@ fun TopicEditModal(
         try {
             val selectedCustomTopics = allCustomTopicsList.filter { selectedTopics.contains(it) }
             val selectedDefaults = DefaultTopics.topics.filter { selectedTopics.contains(it) }
-            val unselectedCustomTopics = allCustomTopicsList.filter { !selectedTopics.contains(it) }.sorted()
-            val unselectedDefaults = DefaultTopics.topics.filter { !selectedTopics.contains(it) }.sorted()
+            val unselectedCustomTopics = allCustomTopicsList.filter { !selectedTopics.contains(it) }
+            val unselectedDefaults = DefaultTopics.topics.filter { !selectedTopics.contains(it) }
             
-            // Selected topics first (custom + default), then unselected sorted (custom + default)
-            selectedCustomTopics + selectedDefaults + unselectedCustomTopics + unselectedDefaults
+            // Combine and sort selected topics alphabetically (custom + default)
+            val allSelectedTopics = (selectedCustomTopics + selectedDefaults).sorted()
+            // Combine and sort unselected topics alphabetically (custom + default)
+            val allUnselectedTopics = (unselectedCustomTopics + unselectedDefaults).sorted()
+            
+            // Selected topics first, then unselected topics (both groups alphabetically sorted)
+            allSelectedTopics + allUnselectedTopics
         } catch (e: Exception) {
             // Fallback to simple list
             DefaultTopics.topics
