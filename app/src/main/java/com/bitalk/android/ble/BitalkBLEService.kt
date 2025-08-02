@@ -31,6 +31,8 @@ class BitalkBLEService(private val context: Context) {
         private const val SCAN_PERIOD_MS = 10000L // 10 seconds
         private const val SCAN_INTERVAL_MS = 30000L // 30 seconds between scans
         private const val ADVERTISE_TIMEOUT_MS = 0 // Continuous advertising
+        private const val USER_TIMEOUT_MS = 45000L // 45 seconds - remove users not seen recently
+        private const val CLEANUP_INTERVAL_MS = 15000L // 15 seconds - cleanup stale users
     }
     
     // Bluetooth components
@@ -45,8 +47,9 @@ class BitalkBLEService(private val context: Context) {
     // Service state
     private var isActive = false
     private var userProfile: UserProfile? = null
-    private val nearbyUsers = HashMap<String, NearbyUser>()
-    private val rssiFilters = HashMap<String, DistanceCalculator.RSSIFilter>()
+    private val nearbyUsers = HashMap<String, NearbyUser>() // Key: username (not device address)
+    private val rssiFilters = HashMap<String, DistanceCalculator.RSSIFilter>() // Key: device address
+    private val deviceToUsername = HashMap<String, String>() // Map device addresses to usernames
     
     // Coroutines
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -86,6 +89,9 @@ class BitalkBLEService(private val context: Context) {
         // Start scanning for others
         startPeriodicScanning()
         
+        // Start periodic cleanup of stale users
+        startPeriodicCleanup()
+        
         return true
     }
     
@@ -117,6 +123,7 @@ class BitalkBLEService(private val context: Context) {
         // Clear data
         nearbyUsers.clear()
         rssiFilters.clear()
+        deviceToUsername.clear()
         
         serviceScope.cancel()
     }
@@ -252,6 +259,43 @@ class BitalkBLEService(private val context: Context) {
                 stopScan()
                 delay(SCAN_INTERVAL_MS - SCAN_PERIOD_MS)
             }
+        }
+    }
+    
+    /**
+     * Start periodic cleanup of stale users
+     */
+    private fun startPeriodicCleanup() {
+        serviceScope.launch {
+            while (isActive) {
+                delay(CLEANUP_INTERVAL_MS)
+                cleanupStaleUsers()
+            }
+        }
+    }
+    
+    /**
+     * Remove users that haven't been seen recently
+     */
+    private fun cleanupStaleUsers() {
+        val currentTime = System.currentTimeMillis()
+        val staleUsers = nearbyUsers.values.filter { user ->
+            !user.isActive(USER_TIMEOUT_MS)
+        }
+        
+        staleUsers.forEach { user ->
+            Log.d(TAG, "Removing stale user: ${user.username} (last seen ${(currentTime - user.lastSeen) / 1000}s ago)")
+            nearbyUsers.remove(user.username)
+            
+            // Also clean up device mappings for this user
+            deviceToUsername.entries.removeAll { it.value == user.username }
+            
+            // Notify delegate
+            delegate?.onUserLost(user)
+        }
+        
+        if (staleUsers.isNotEmpty()) {
+            Log.d(TAG, "Cleaned up ${staleUsers.size} stale users")
         }
     }
     
@@ -432,6 +476,13 @@ class BitalkBLEService(private val context: Context) {
         val filter = rssiFilters.getOrPut(deviceAddress) { DistanceCalculator.RSSIFilter() }
         val distance = filter.getSmoothedDistance(rssi)
         
+        // Map device address to username for future cleanup
+        deviceToUsername[deviceAddress] = broadcast.username
+        
+        // Check if we already know this user (by username, not device address)
+        val existingUser = nearbyUsers[broadcast.username]
+        val isNewUser = existingUser == null
+        
         // Create or update nearby user
         val nearbyUser = NearbyUser(
             username = broadcast.username,
@@ -440,15 +491,15 @@ class BitalkBLEService(private val context: Context) {
             rssi = rssi,
             estimatedDistance = distance,
             matchingTopics = matchingTopics,
-            firstSeen = nearbyUsers[deviceAddress]?.firstSeen ?: System.currentTimeMillis(),
+            firstSeen = existingUser?.firstSeen ?: System.currentTimeMillis(),
             lastSeen = System.currentTimeMillis(),
             deviceAddress = deviceAddress
         )
         
-        val isNewUser = !nearbyUsers.containsKey(deviceAddress)
-        nearbyUsers[deviceAddress] = nearbyUser
+        // Store by username to prevent duplicates
+        nearbyUsers[broadcast.username] = nearbyUser
         
-        Log.i(TAG, "*** MATCH FOUND *** User ${broadcast.username} at ${nearbyUser.formattedDistance} with matching topics: $matchingTopics")
+        Log.i(TAG, "*** MATCH FOUND *** User ${broadcast.username} at ${nearbyUser.formattedDistance} with matching topics: $matchingTopics (${if (isNewUser) "NEW" else "UPDATED"})")
         
         // Notify delegate
         if (isNewUser) {

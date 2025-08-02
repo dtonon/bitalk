@@ -144,10 +144,10 @@ class MainViewModel : ViewModel(), BitalkBLEDelegate {
     private fun stopBLEService() {
         bleService?.stopServices()
         _uiState.value = _uiState.value.copy(
-            isScanning = false,
-            nearbyUsers = emptyList()
+            isScanning = false
+            // DON'T clear nearbyUsers - let them timeout naturally via onUserLost()
         )
-        Log.d(TAG, "BLE service stopped")
+        Log.d(TAG, "BLE service stopped - keeping existing users until they timeout")
     }
     
     // BitalkBLEDelegate implementation
@@ -155,7 +155,17 @@ class MainViewModel : ViewModel(), BitalkBLEDelegate {
         Log.d(TAG, "User discovered: ${user.username} at ${user.formattedDistance}")
         
         val currentUsers = _uiState.value.nearbyUsers.toMutableList()
-        currentUsers.add(user)
+        
+        // Check if user already exists by username (prevent duplicates)
+        val existingIndex = currentUsers.indexOfFirst { it.username == user.username }
+        if (existingIndex >= 0) {
+            // Update existing user instead of adding duplicate
+            Log.d(TAG, "User ${user.username} already exists, updating instead of adding")
+            currentUsers[existingIndex] = user
+        } else {
+            // Add new user
+            currentUsers.add(user)
+        }
         
         _uiState.value = _uiState.value.copy(nearbyUsers = currentUsers)
         
@@ -166,10 +176,17 @@ class MainViewModel : ViewModel(), BitalkBLEDelegate {
         Log.d(TAG, "User updated: ${user.username} at ${user.formattedDistance}")
         
         val currentUsers = _uiState.value.nearbyUsers.toMutableList()
-        val index = currentUsers.indexOfFirst { it.deviceAddress == user.deviceAddress }
+        
+        // Find user by username (not device address)
+        val index = currentUsers.indexOfFirst { it.username == user.username }
         
         if (index >= 0) {
             currentUsers[index] = user
+            _uiState.value = _uiState.value.copy(nearbyUsers = currentUsers)
+        } else {
+            Log.w(TAG, "Tried to update non-existent user: ${user.username}")
+            // Add user if not found (fallback)
+            currentUsers.add(user)
             _uiState.value = _uiState.value.copy(nearbyUsers = currentUsers)
         }
     }
@@ -178,9 +195,16 @@ class MainViewModel : ViewModel(), BitalkBLEDelegate {
         Log.d(TAG, "User lost: ${user.username}")
         
         val currentUsers = _uiState.value.nearbyUsers.toMutableList()
-        currentUsers.removeAll { it.deviceAddress == user.deviceAddress }
         
-        _uiState.value = _uiState.value.copy(nearbyUsers = currentUsers)
+        // Remove user by username (not device address)
+        val removed = currentUsers.removeAll { it.username == user.username }
+        
+        if (removed) {
+            Log.d(TAG, "Removed user ${user.username}")
+            _uiState.value = _uiState.value.copy(nearbyUsers = currentUsers)
+        } else {
+            Log.w(TAG, "Tried to remove non-existent user: ${user.username}")
+        }
     }
     
     override fun onCleared() {
