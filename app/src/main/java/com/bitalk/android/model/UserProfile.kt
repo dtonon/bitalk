@@ -20,13 +20,6 @@ data class UserProfile(
  */
 object DefaultTopics {
     val topics = listOf(
-        "bitcoin", "nostr", "crypto", "ethereum",
-        "pizza", "coffee", "food", "cooking", 
-        "music", "art", "photography", "design",
-        "tech", "programming", "android", "linux",
-        "travel", "hiking", "fitness", "yoga",
-        "gaming", "books", "movies", "anime",
-        "startup", "investing", "trading",
-        "weird-interests", "memes", "cats"
+        "android", "anime", "art", "bitcoin", "books", "cats", "coffee", "cooking", "design", "fitness", "gaming", "hiking", "linux", "memes", "movies", "music", "nostr", "open-source", "photography", "programming", "pizza", "startup", "tech", "travel", "yoga"
     )
 }
