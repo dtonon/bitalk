@@ -402,15 +402,15 @@ fun TopicsSection(
 @Composable
 fun TopicChip(topic: String) {
     Surface(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(12.dp),
         color = BitalkAccent.copy(alpha = 0.1f),
         border = androidx.compose.foundation.BorderStroke(1.dp, BitalkAccent)
     ) {
         Text(
-            text = "🏷️ $topic",
+            text = topic,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
             fontSize = 12.sp,
-            color = BitalkAccent
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }

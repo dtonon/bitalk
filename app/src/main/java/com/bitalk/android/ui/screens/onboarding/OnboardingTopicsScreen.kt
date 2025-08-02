@@ -144,7 +144,7 @@ fun TopicChip(
     onToggle: () -> Unit
 ) {
     Surface(
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(12.dp),
         color = if (isSelected) BitalkAccent.copy(alpha = 0.1f) else Color.Transparent,
         modifier = Modifier
             .clickable { onToggle() }
@@ -155,7 +155,7 @@ fun TopicChip(
             )
     ) {
         Text(
-            text = "🏷️ $topic",
+            text = "$topic",
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             fontSize = 14.sp,
             color = if (isSelected) BitalkAccent else Color.Gray

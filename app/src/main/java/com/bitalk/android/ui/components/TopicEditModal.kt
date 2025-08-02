@@ -263,9 +263,9 @@ fun TopicSelectionItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = if (isCustom) "⭐ $topic" else "🏷️ $topic",
+                text = topic,
                 fontSize = 14.sp,
-                color = if (isSelected) BitalkAccent else MaterialTheme.colorScheme.onSurface,
+                color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 modifier = Modifier.weight(1f)
             )
             

@@ -124,7 +124,7 @@ fun UserDetailModal(
                 ) {
                     items(user.topics) { topic ->
                         Surface(
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(12.dp),
                             color = if (user.matchingTopics.contains(topic)) {
                                 BitalkAccent.copy(alpha = 0.2f)
                             } else {
@@ -140,7 +140,7 @@ fun UserDetailModal(
                             )
                         ) {
                             Text(
-                                text = "🏷️ $topic",
+                                text = "$topic",
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                 fontSize = 12.sp,
                                 color = if (user.matchingTopics.contains(topic)) {
