@@ -83,17 +83,7 @@ fun OnboardingTopicsScreen(
         )
         
         Spacer(modifier = Modifier.height(24.dp))
-        
-        // Selected topics count
-        Text(
-            text = "Selected: ${uiState.selectedTopics.size}",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Medium,
-            color = BitalkAccent
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
+                
         // Topics grid
         LazyColumn(
             modifier = Modifier.weight(1f)

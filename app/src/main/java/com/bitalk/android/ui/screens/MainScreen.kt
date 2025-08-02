@@ -310,20 +310,7 @@ fun EmptyState(isScanning: Boolean) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = if (isScanning) "Scanning for users..." else "Scanning paused",
-            fontSize = 22.sp,
-            color = Color.Gray,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = if (isScanning) {
-                "Make sure Bluetooth is enabled and you're in a public place"
-            } else {
-                "Tap the play button to start scanning"
-            },
+            text = if (isScanning) "Waiting for interesting people..." else "Scanning paused",
             fontSize = 18.sp,
             color = Color.Gray,
             textAlign = TextAlign.Center

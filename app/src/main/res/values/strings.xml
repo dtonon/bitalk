@@ -1,47 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Bitalk</string>
-    
+
     <!-- Onboarding -->
     <string name="onboarding_welcome">Welcome to Bitalk</string>
     <string name="onboarding_topics_title">Select Your Topics</string>
-    <string name="onboarding_topics_subtitle">Choose topics you\'re interested in to find like-minded people nearby</string>
+    <string name="onboarding_topics_subtitle">Choose topics you\'re interested in to find like-minded people nearby; you can also add your own topics later</string>
     <string name="onboarding_description_title">Describe Yourself</string>
     <string name="onboarding_description_subtitle">Help others identify you (e.g., \"yellow shirt and sunglasses\")</string>
     <string name="onboarding_permissions_title">Enable Permissions</string>
     <string name="onboarding_permissions_subtitle">Bitalk needs these permissions to work properly</string>
-    
+
     <!-- Main Screen -->
     <string name="scanning_status">Scanning: %d nearby users</string>
     <string name="scanning_paused">Paused</string>
     <string name="no_users_found">No users found yet</string>
     <string name="user_distance_format">~%dm</string>
-    
+
     <!-- Topics -->
     <string name="add_topic">Add Topic</string>
-    <string name="topic_preferences">Topic Preferences</string>
+    <string name="matching_mode">Matching mode</string>
     <string name="exact_matching">Exact Matching</string>
     <string name="partial_matching">Partial Matching</string>
-    
+
     <!-- User Profile -->
     <string name="change_username">Change Username</string>
     <string name="username_format">bitalk/%s</string>
-    
+
     <!-- Permissions -->
     <string name="permission_bluetooth">Bluetooth</string>
     <string name="permission_location">Location</string>
     <string name="permission_notifications">Notifications</string>
     <string name="permission_battery">Battery Optimization</string>
-    
+
     <string name="permission_bluetooth_desc">Required for mesh networking</string>
     <string name="permission_location_desc">Required for BLE scanning (no GPS tracking)</string>
     <string name="permission_notifications_desc">Required for match notifications</string>
     <string name="permission_battery_desc">Required for background scanning</string>
-    
+
     <!-- Common -->
     <string name="next">Next</string>
     <string name="back">Back</string>
     <string name="done">Done</string>
+    <string name="continuex">Continue</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="close">Close</string>

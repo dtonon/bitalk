@@ -44,7 +44,7 @@ fun TopicPreferencesModal(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = stringResource(R.string.topic_preferences),
+                        text = stringResource(R.string.matching_mode),
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = BitalkAccent
@@ -59,16 +59,6 @@ fun TopicPreferencesModal(
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
-
-                // Matching mode options
-                Text(
-                    text = "Topic Matching Mode",
-                    fontSize = 21.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
 
                 // Partial matching option
                 Card(
@@ -166,7 +156,7 @@ fun TopicPreferencesModal(
                         }
 
                         Text(
-                            text = "Only matches identical topics (e.g., \"bitcoin\" only matches \"bitcoin\")",
+                            text = "Only matches identical topics (e.g., \"art\" only matches \"art\")",
                             fontSize = 18.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                             modifier = Modifier.padding(start = 40.dp)

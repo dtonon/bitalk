@@ -84,12 +84,6 @@ fun UsernameEditModal(
                                 color = MaterialTheme.colorScheme.error,
                                 fontSize = 16.sp
                             )
-                        } else {
-                            Text(
-                                text = "Will appear as: bitalk/$username",
-                                fontSize = 16.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            )
                         }
                     },
                     colors = OutlinedTextFieldDefaults.colors(
