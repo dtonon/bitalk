@@ -1,20 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Bitalk" parent="Theme.Material3.DayNight">
+    <style name="Theme.Bitalk" parent="android:Theme.Material.Light">
         <!-- Primary brand color -->
-        <item name="colorPrimary">@color/bitalk_accent</item>
-        <item name="colorPrimaryVariant">@color/bitalk_accent_dark</item>
-        <item name="colorOnPrimary">@color/white</item>
-        
-        <!-- Secondary brand color -->
-        <item name="colorSecondary">@color/bitalk_accent</item>
-        <item name="colorSecondaryVariant">@color/bitalk_accent_dark</item>
-        <item name="colorOnSecondary">@color/white</item>
+        <item name="android:colorPrimary">@color/bitalk_accent</item>
         
         <!-- Status bar color -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-        
-        <!-- System navigation bar -->
-        <item name="android:navigationBarColor">?attr/colorSurface</item>
+        <item name="android:statusBarColor">@color/bitalk_accent_dark</item>
     </style>
 </resources>

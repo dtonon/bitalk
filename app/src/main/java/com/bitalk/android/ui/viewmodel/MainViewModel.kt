@@ -51,12 +51,10 @@ class MainViewModel : ViewModel(), BitalkBLEDelegate {
         
         // Start BLE service if user has completed onboarding
         val currentProfile = _uiState.value.userProfile
-        if (userManager?.hasCompletedOnboarding() == true) {
+        if (userManager?.hasCompletedOnboarding() == true && currentProfile.topics.isNotEmpty()) {
             startBLEService(currentProfile)
-        } else {
-            // Create default profile for testing
-            createTestProfile()
         }
+        // Don't create test profile - let onboarding handle profile creation
     }
     
     /**
@@ -83,6 +81,33 @@ class MainViewModel : ViewModel(), BitalkBLEDelegate {
     }
     
     /**
+     * Update username
+     */
+    fun updateUsername(newUsername: String) {
+        val currentProfile = _uiState.value.userProfile
+        val updatedProfile = currentProfile.copy(username = newUsername)
+        updateUserProfile(updatedProfile)
+    }
+    
+    /**
+     * Update topics
+     */
+    fun updateTopics(newTopics: List<String>) {
+        val currentProfile = _uiState.value.userProfile
+        val updatedProfile = currentProfile.copy(topics = newTopics)
+        updateUserProfile(updatedProfile)
+    }
+    
+    /**
+     * Update exact match mode
+     */
+    fun updateExactMatchMode(exactMode: Boolean) {
+        val currentProfile = _uiState.value.userProfile
+        val updatedProfile = currentProfile.copy(exactMatchMode = exactMode)
+        updateUserProfile(updatedProfile)
+    }
+    
+    /**
      * Load user profile from storage
      */
     private fun loadUserProfile() {
@@ -93,24 +118,9 @@ class MainViewModel : ViewModel(), BitalkBLEDelegate {
         )
         
         _uiState.value = _uiState.value.copy(userProfile = profile)
-        Log.d(TAG, "Loaded user profile: ${profile.username}")
+        Log.d(TAG, "Loaded user profile: ${profile.username} with topics: ${profile.topics}")
     }
     
-    /**
-     * Create test profile for development
-     */
-    private fun createTestProfile() {
-        val testProfile = UserProfile(
-            username = "anon${(100..999).random()}",
-            description = "test user",
-            topics = DefaultTopics.topics.take(3)
-        )
-        
-        updateUserProfile(testProfile)
-        startBLEService(testProfile)
-        
-        Log.d(TAG, "Created test profile: ${testProfile.username}")
-    }
     
     /**
      * Start BLE service

@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bitalk.android.model.NearbyUser
+import com.bitalk.android.ui.components.*
 import com.bitalk.android.ui.theme.BitalkAccent
 import com.bitalk.android.ui.viewmodel.MainViewModel
 
@@ -39,6 +40,12 @@ fun MainScreen() {
     }
     
     val uiState by viewModel.uiState.collectAsState()
+    
+    // Modal states
+    var showTopicsModal by remember { mutableStateOf(false) }
+    var showPreferencesModal by remember { mutableStateOf(false) }
+    var showUsernameModal by remember { mutableStateOf(false) }
+    var selectedUser by remember { mutableStateOf<NearbyUser?>(null) }
     
     Column(
         modifier = Modifier.fillMaxSize()
@@ -56,12 +63,12 @@ fun MainScreen() {
             contentAlignment = Alignment.BottomCenter
         ) {
             if (uiState.nearbyUsers.isEmpty()) {
-                EmptyState()
+                EmptyState(isScanning = uiState.isScanning)
             } else {
                 BubbleArea(
                     nearbyUsers = uiState.nearbyUsers,
                     onUserClick = { user ->
-                        // TODO: Show user detail modal
+                        selectedUser = user
                     }
                 )
             }
@@ -70,11 +77,12 @@ fun MainScreen() {
         // Topics Section
         TopicsSection(
             topics = uiState.userProfile.topics,
+            exactMatchMode = uiState.userProfile.exactMatchMode,
             onTopicsClick = {
-                // TODO: Show topics modal
+                showTopicsModal = true
             },
             onPreferencesClick = {
-                // TODO: Show preferences modal
+                showPreferencesModal = true
             }
         )
         
@@ -82,8 +90,46 @@ fun MainScreen() {
         UsernameFooter(
             username = uiState.userProfile.username,
             onUsernameClick = {
-                // TODO: Show username change modal
+                showUsernameModal = true
             }
+        )
+    }
+    
+    // Modals
+    if (showTopicsModal) {
+        TopicEditModal(
+            currentTopics = uiState.userProfile.topics,
+            onTopicsChanged = { newTopics ->
+                viewModel.updateTopics(newTopics)
+            },
+            onDismiss = { showTopicsModal = false }
+        )
+    }
+    
+    if (showPreferencesModal) {
+        TopicPreferencesModal(
+            exactMatchMode = uiState.userProfile.exactMatchMode,
+            onPreferenceChanged = { exactMode ->
+                viewModel.updateExactMatchMode(exactMode)
+            },
+            onDismiss = { showPreferencesModal = false }
+        )
+    }
+    
+    if (showUsernameModal) {
+        UsernameEditModal(
+            currentUsername = uiState.userProfile.username,
+            onUsernameChanged = { newUsername ->
+                viewModel.updateUsername(newUsername)
+            },
+            onDismiss = { showUsernameModal = false }
+        )
+    }
+    
+    selectedUser?.let { user ->
+        UserDetailModal(
+            user = user,
+            onDismiss = { selectedUser = null }
         )
     }
 }
@@ -220,14 +266,14 @@ fun UserBubble(
 }
 
 @Composable
-fun EmptyState() {
+fun EmptyState(isScanning: Boolean) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "No users found yet",
+            text = if (isScanning) "Scanning for users..." else "Scanning paused",
             fontSize = 16.sp,
             color = Color.Gray,
             textAlign = TextAlign.Center
@@ -236,7 +282,11 @@ fun EmptyState() {
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "Make sure Bluetooth is enabled and you're in a public place",
+            text = if (isScanning) {
+                "Make sure Bluetooth is enabled and you're in a public place"
+            } else {
+                "Tap the play button to start scanning"
+            },
             fontSize = 12.sp,
             color = Color.Gray,
             textAlign = TextAlign.Center
@@ -247,6 +297,7 @@ fun EmptyState() {
 @Composable
 fun TopicsSection(
     topics: List<String>,
+    exactMatchMode: Boolean,
     onTopicsClick: () -> Unit,
     onPreferencesClick: () -> Unit
 ) {
@@ -268,25 +319,44 @@ fun TopicsSection(
                     .clickable { onTopicsClick() },
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                topics.take(3).forEach { topic ->
-                    TopicChip(topic = topic)
-                }
-                if (topics.size > 3) {
+                if (topics.isEmpty()) {
                     Text(
-                        text = "+${topics.size - 3}",
-                        fontSize = 12.sp,
+                        text = "Tap to add topics",
+                        fontSize = 14.sp,
                         color = Color.Gray
                     )
+                } else {
+                    topics.take(3).forEach { topic ->
+                        TopicChip(topic = topic)
+                    }
+                    if (topics.size > 3) {
+                        Text(
+                            text = "+${topics.size - 3}",
+                            fontSize = 12.sp,
+                            color = Color.Gray
+                        )
+                    }
                 }
             }
             
-            // Preferences icon
-            IconButton(onClick = onPreferencesClick) {
-                Icon(
-                    imageVector = Icons.Filled.Settings,
-                    contentDescription = "Preferences",
-                    tint = Color.Gray
-                )
+            // Preferences icon with indicator
+            Box {
+                IconButton(onClick = onPreferencesClick) {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = "Preferences",
+                        tint = Color.Gray
+                    )
+                }
+                
+                if (exactMatchMode) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(BitalkAccent, CircleShape)
+                            .align(Alignment.TopEnd)
+                    )
+                }
             }
         }
     }

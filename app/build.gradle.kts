@@ -69,6 +69,9 @@ dependencies {
     // Navigation
     implementation(libs.androidx.navigation.compose)
     
+    // ViewModel
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    
     // Permissions
     implementation(libs.accompanist.permissions)
     

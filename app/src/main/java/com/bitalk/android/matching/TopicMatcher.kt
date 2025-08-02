@@ -54,8 +54,8 @@ object TopicMatcher {
     }
     
     /**
-     * Find partial topic matches (substring matching)
-     * Examples: "bitcoin" matches "bitcoin-core", "lightning", "crypto"
+     * Find partial topic matches (true substring matching)
+     * Examples: "art" matches "artistic", "pop-art", "dart"
      */
     private fun findPartialMatches(userTopics: List<String>, broadcastTopics: List<String>): List<String> {
         val matches = mutableSetOf<String>()
@@ -73,51 +73,15 @@ object TopicMatcher {
     
     /**
      * Check if two topics are partial matches
-     * Handles bidirectional substring matching and common prefixes
+     * Pure substring matching - one topic contains the other
      */
     private fun isPartialMatch(topic1: String, topic2: String): Boolean {
         // Exact match
         if (topic1 == topic2) return true
         
         // Substring matching (bidirectional)
-        if (topic1.contains(topic2) || topic2.contains(topic1)) return true
-        
-        // Common prefix matching (minimum 3 characters)
-        if (topic1.length >= 3 && topic2.length >= 3) {
-            val minLength = minOf(topic1.length, topic2.length)
-            for (i in 3..minLength) {
-                if (topic1.substring(0, i) == topic2.substring(0, i)) {
-                    return true
-                }
-            }
-        }
-        
-        // Fuzzy matching for common variations
-        return isFuzzyMatch(topic1, topic2)
-    }
-    
-    /**
-     * Handle common topic variations and synonyms
-     */
-    private fun isFuzzyMatch(topic1: String, topic2: String): Boolean {
-        val synonyms = mapOf(
-            "crypto" to listOf("bitcoin", "ethereum", "blockchain"),
-            "tech" to listOf("programming", "coding", "software"),
-            "fitness" to listOf("gym", "workout", "exercise"),
-            "food" to listOf("cooking", "recipes", "eating"),
-            "music" to listOf("songs", "audio", "sound"),
-            "art" to listOf("drawing", "painting", "creative")
-        )
-        
-        for ((key, values) in synonyms) {
-            if ((topic1 == key && values.contains(topic2)) ||
-                (topic2 == key && values.contains(topic1)) ||
-                (values.contains(topic1) && values.contains(topic2))) {
-                return true
-            }
-        }
-        
-        return false
+        // "art" matches "artistic" or "pop-art"
+        return topic1.contains(topic2) || topic2.contains(topic1)
     }
     
     /**
