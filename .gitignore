@@ -1,0 +1,8 @@
+.gradle
+.DS_Store
+/build
+/captures
+/app/release
+/app/build
+/.kotlin/
+/app/debug/
