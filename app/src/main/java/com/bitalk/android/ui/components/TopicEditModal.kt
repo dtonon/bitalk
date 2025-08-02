@@ -4,7 +4,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -14,7 +16,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -24,6 +29,7 @@ import androidx.compose.ui.window.Dialog
 import com.bitalk.android.R
 import com.bitalk.android.model.DefaultTopics
 import com.bitalk.android.ui.theme.BitalkAccent
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -35,6 +41,36 @@ fun TopicEditModal(
     var selectedTopics by remember { mutableStateOf(currentTopics.toSet()) }
     var customTopic by remember { mutableStateOf("") }
     var showAddCustom by remember { mutableStateOf(false) }
+    
+    val listState = rememberLazyListState()
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    
+    // Create a stable list that maintains order and includes custom topics
+    val allTopics = remember(selectedTopics) {
+        val customTopics = selectedTopics.filter { !DefaultTopics.topics.contains(it) }
+        val selectedDefaults = DefaultTopics.topics.filter { selectedTopics.contains(it) }
+        val unselectedDefaults = DefaultTopics.topics.filter { !selectedTopics.contains(it) }.sorted()
+        
+        // Selected topics first (custom + default), then unselected sorted
+        customTopics + selectedDefaults + unselectedDefaults
+    }
+    
+    // Auto-scroll to top when custom topic is added
+    LaunchedEffect(selectedTopics.filter { !DefaultTopics.topics.contains(it) }.size) {
+        if (selectedTopics.any { !DefaultTopics.topics.contains(it) }) {
+            listState.animateScrollToItem(0)
+        }
+    }
+    
+    // Auto-focus and show keyboard when input appears
+    LaunchedEffect(showAddCustom) {
+        if (showAddCustom) {
+            delay(100) // Small delay to ensure UI is ready
+            focusRequester.requestFocus()
+            keyboardController?.show()
+        }
+    }
     
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -74,59 +110,28 @@ fun TopicEditModal(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Selected count
-                Text(
-                    text = "Selected: ${selectedTopics.size}",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = BitalkAccent
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                // Topics list
+                // Topics list - maintains position, only changes selection state
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Default topics
-                    items(DefaultTopics.topics) { topic ->
+                    items(allTopics) { topic ->
+                        val isSelected = selectedTopics.contains(topic)
+                        val isCustom = !DefaultTopics.topics.contains(topic)
+                        
                         TopicSelectionItem(
                             topic = topic,
-                            isSelected = selectedTopics.contains(topic),
+                            isSelected = isSelected,
+                            isCustom = isCustom,
                             onToggle = {
-                                selectedTopics = if (selectedTopics.contains(topic)) {
+                                selectedTopics = if (isSelected) {
                                     selectedTopics - topic
                                 } else {
                                     selectedTopics + topic
                                 }
                             }
                         )
-                    }
-                    
-                    // Custom topics (not in default list)
-                    val customTopics = selectedTopics.filter { !DefaultTopics.topics.contains(it) }
-                    if (customTopics.isNotEmpty()) {
-                        item {
-                            Divider(modifier = Modifier.padding(vertical = 8.dp))
-                            Text(
-                                text = "Custom Topics",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                            )
-                        }
-                        
-                        items(customTopics) { topic ->
-                            TopicSelectionItem(
-                                topic = topic,
-                                isSelected = true,
-                                isCustom = true,
-                                onToggle = {
-                                    selectedTopics = selectedTopics - topic
-                                }
-                            )
-                        }
                     }
                     
                     // Add custom topic
@@ -138,7 +143,9 @@ fun TopicEditModal(
                                 value = customTopic,
                                 onValueChange = { customTopic = it },
                                 label = { Text("Custom Topic") },
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(focusRequester),
                                 keyboardOptions = KeyboardOptions(
                                     capitalization = KeyboardCapitalization.Words
                                 ),
@@ -160,9 +167,14 @@ fun TopicEditModal(
                                     focusedLabelColor = BitalkAccent
                                 )
                             )
+                            
+                            // Add extra space below input
+                            Spacer(modifier = Modifier.height(16.dp))
                         } else {
                             OutlinedButton(
-                                onClick = { showAddCustom = true },
+                                onClick = { 
+                                    showAddCustom = true
+                                },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Icon(
