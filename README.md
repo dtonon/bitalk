@@ -1,4 +1,4 @@
-# 🗨️ Bitalk - Discover Like-Minded People Nearby!
+# 🗨️ Bitalk - Discover like-minded people nearby!
 
 **Connect with fascinating people around you using cutting-edge Bluetooth mesh networking!** 
 
@@ -25,59 +25,59 @@ In our hyper-connected yet paradoxically isolated world, I believe the most mean
 
 ## How Bitalk Works
 
-### 1. **Choose Your Topics**
+### 1. **Choose your topics**
 Select from dozens of interesting topics or create your own! From "Bitcoin" and "Art" to "Hiking" and "Startups" - let people know what makes you tick.
 
-### 2. **Describe Yourself**
+### 2. **Describe yourself**
 Add a quick description to help others identify you: "Guy in the yellow shirt by the coffee counter" or "Woman with the cool vintage backpack"
 
-### 3. **Start Discovering**
+### 3. **Start discovering**
 Bitalk automatically scans for nearby people using Bluetooth. When someone with matching interests comes within range, you'll see them appear as a bubble on your screen!
 
-### 4. **Connect & Talk**
+### 4. **Connect & talk**
 Tap on someone's bubble to see their full profile, shared interests, and how long they've been nearby. If you vibe with their topics, approach them for a real conversation!
 
-## Key Features
+## Key features
 
-### **Smart Topic Matching**
-- **Partial Matching**: "Art" matches "Digital Art", "Street Art", etc.
-- **Exact Matching**: Only match identical topics for more precise connections
-- **Custom Topics**: Create your own topics that others can discover and match with
+### **Smart topic matching**
+- **Partial matching**: "Art" matches "Digital Art", "Street Art", etc.
+- **Exact matching**: Only match identical topics for more precise connections
+- **Custom topics**: Create your own topics that others can discover and match with
 
-### **Intuitive Interface** 
-- **Bubble Visualization**: See people as floating bubbles - bigger bubbles mean they're closer!
-- **Distance Indicators**: "Very Close", "Close", "Far" - know exactly how near someone is
-- **Real-time Updates**: Watch as people move in and out of range
+### **Intuitive interface** 
+- **Bubble visualization**: See people as floating bubbles - bigger bubbles mean they're closer!
+- **Distance indicators**: "Very Close", "Close", "Far" - know exactly how near someone is
+- **Real-time updates**: Watch as people move in and out of range
 
-### **Smart Notifications**
+### **Smart notifications**
 Get instant alerts when someone with matching interests enters your vicinity:
 *"Found match: Nostr, Startups - alice: Woman in red jacket with many pins"*
 
-### **Privacy & Security**
+### **Privacy & security**
 - **No GPS tracking** - only uses Bluetooth proximity
 - **No personal data collection** - everything stays on your device  
 - **No account required** - just pick a username and you're ready!
 - **Ephemeral connections** - people disappear when they're no longer nearby
 
-## Getting Started
+## Getting started
 
 ### Installation
 1. Availavle for Android, download the apk from the [releases](https://github.com/dtonon/bitalk/releases).
 
-### First-Time Setup
-1. **Welcome Screen**: Learn about Bitalk's mission
-2. **Select Topics**: Choose what interests you (minimum 1 required)
-3. **Describe Yourself**: Add a brief description for identification  
-4. **Grant Permissions**: Enable Bluetooth, location (for BLE), and notifications
-5. **Start Discovering**: You're ready to meet amazing people!
+### First-time setup
+1. **Welcome screen**: Learn about Bitalk's mission
+2. **Select topics**: Choose what interests you (minimum 1 required)
+3. **Describe yourself**: Add a brief description for identification  
+4. **Grant permissions**: Enable Bluetooth, location (for BLE), and notifications
+5. **Start discovering**: You're ready to meet amazing people!
 
-### Daily Usage
+### Daily usage
 1. Open Bitalk when you're somewhere interesting (café, event, coworking space)
 2. Watch for bubbles to appear as like-minded people come nearby
 3. Tap bubbles to see detailed profiles and shared interests
 4. Approach people you find interesting for genuine face-to-face conversations!
 
-## Perfect For
+## Perfect for
 
 - **Coffee shops & cafés** - Find other remote workers, creatives, or entrepreneurs
 - **Conferences & events** - Connect with attendees who share your professional interests  
@@ -88,7 +88,7 @@ Get instant alerts when someone with matching interests enters your vicinity:
 - **Bookstores & libraries** - Connect with other book lovers and intellectuals
 - **Meetups & gatherings** - Enhanced networking at community events
 
-## Technical Details
+## Technical details
 
 - **Platform**: Android (iOS coming soon!)
 - **Technology**: Kotlin, Jetpack Compose, Bluetooth Low Energy (BLE)
@@ -107,7 +107,7 @@ I would love your help making Bitalk even better! Whether you're interested in:
 
 Check out our issues page and feel free to submit pull requests!
 
-## Join the Movement
+## Join the movement
 
 Bitalk represents a return to **authentic, serendipitous connections** in our increasingly digital world. I believe the most interesting conversations happen with strangers who become friends, and the best opportunities come from unexpected encounters.
 

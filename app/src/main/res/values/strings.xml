@@ -5,11 +5,11 @@
     <!-- Onboarding -->
     <string name="onboarding_welcome">Welcome to Bitalk</string>
     <string name="onboarding_welcome_desc">Discover like-minded people nearby using Bluetooth mesh networking</string>
-    <string name="onboarding_topics_title">Select Your Topics</string>
+    <string name="onboarding_topics_title">Select your topics</string>
     <string name="onboarding_topics_subtitle">Choose topics you\'re interested in to find like-minded people nearby; you can also add your own topics later</string>
-    <string name="onboarding_description_title">Describe Yourself</string>
+    <string name="onboarding_description_title">Describe yourself</string>
     <string name="onboarding_description_subtitle">Help others identify you (e.g., \"yellow shirt and sunglasses\")</string>
-    <string name="onboarding_permissions_title">Enable Permissions</string>
+    <string name="onboarding_permissions_title">Enable permissions</string>
     <string name="onboarding_permissions_subtitle">Bitalk needs these permissions to work properly</string>
 
     <!-- Main Screen -->
@@ -20,21 +20,21 @@
     <string name="user_distance_format">~%dm</string>
 
     <!-- Topics -->
-    <string name="add_topic">Add Topic</string>
-    <string name="edit_topics">Edit Topics</string>
-    <string name="custom_topic">Custom Topic</string>
-    <string name="add_custom_topic">Add Custom Topic</string>
+    <string name="add_topic">Add topic</string>
+    <string name="edit_topics">Edit topics</string>
+    <string name="custom_topic">Custom topic</string>
+    <string name="add_custom_topic">Add custom topic</string>
     <string name="add_button">Add</string>
     <string name="tap_to_add_topics">Tap to add topics</string>
     <string name="matching_mode">Matching mode</string>
-    <string name="exact_matching">Exact Matching</string>
-    <string name="partial_matching">Partial Matching</string>
+    <string name="exact_matching">Exact matching</string>
+    <string name="partial_matching">Partial matching</string>
     <string name="partial_matching_desc">Matches partial topics (e.g., \"art\" matches \"artistic\", \"pop-art\")</string>
     <string name="exact_matching_desc">Only matches identical topics (e.g., \"art\" only matches \"art\")</string>
 
     <!-- User Profile -->
-    <string name="change_username">Change Username</string>
-    <string name="change_user_info">Change user info</string>
+    <string name="change_username">Change username</string>
+    <string name="change_your_info">Change your info</string>
     <string name="username">Username</string>
     <string name="username_placeholder">e.g., anon123</string>
     <string name="username_validation_error">Username must be 3-20 characters, letters, numbers, and underscores only</string>
@@ -46,8 +46,8 @@
     <string name="permission_bluetooth">Bluetooth</string>
     <string name="permission_location">Location</string>
     <string name="permission_notifications">Notifications</string>
-    <string name="permission_battery">Battery Optimization</string>
-    <string name="grant_permissions">Grant Permissions</string>
+    <string name="permission_battery">Battery optimization</string>
+    <string name="grant_permissions">Grant permissions</string>
 
     <string name="permission_bluetooth_desc">Required for mesh networking</string>
     <string name="permission_location_desc">Required for BLE scanning (no GPS tracking)</string>
