@@ -4,7 +4,7 @@
 
 *No internet required • Privacy-first • Completely decentralized*
 
----
+https://github.com/user-attachments/assets/4a730807-e6a1-40fe-9c0b-e3969e7b9271
 
 ## What is Bitalk?
 
