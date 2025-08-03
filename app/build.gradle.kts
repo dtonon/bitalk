@@ -22,14 +22,30 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../debug.keystore")
+            storePassword = "android"
+            keyAlias = "bitalk"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+    }
+    
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
         }
     }
     
@@ -86,6 +102,9 @@ dependencies {
     
     // Security preferences for user data
     implementation(libs.androidx.security.crypto)
+    
+    // JSR 305 annotations (needed for Google Tink/Security Crypto)
+    implementation("com.google.code.findbugs:jsr305:3.0.2")
     
     // Testing
     testImplementation(libs.bundles.testing)
