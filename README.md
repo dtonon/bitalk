@@ -15,13 +15,7 @@ Whether you're at a coffee shop, conference, concert, or just walking around tow
 ## Why Bitalk
 
 In our hyper-connected yet paradoxically isolated world, I believe the most meaningful connections happen **face-to-face** with people who share your interests. But how do you discover these kindred spirits in a crowded room or bustling city?
-
-- **Zero internet required** - works completely offline!
-- **Privacy-first design** - you share just a topic and an
-- **Hyper-local discovery** - only shows people within Bluetooth range (~30 meters)
-- **Interest-based matching** - connect over shared topics and hobbies
-- **Real-time notifications** - get alerted when someone interesting is nearby
-- **Completely decentralized** - no central servers or corporate surveillance
+Bitalk helps you find people who have the same interests as you.
 
 ## How Bitalk Works
 
@@ -54,10 +48,13 @@ Get instant alerts when someone with matching interests enters your vicinity:
 *"Found match: Nostr, Startups - alice: Woman in red jacket with many pins"*
 
 ### **Privacy & security**
+- **Zero internet required** - works completely offline!
 - **No GPS tracking** - only uses Bluetooth proximity
 - **No personal data collection** - everything stays on your device  
 - **No account required** - just pick a username and you're ready!
 - **Ephemeral connections** - people disappear when they're no longer nearby
+- **Hyper-local discovery** - only shows people within Bluetooth range (~30 meters)
+- **Completely decentralized** - no central servers or corporate surveillance
 
 ## Getting started
 
