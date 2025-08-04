@@ -27,12 +27,13 @@ class BitalkBLEService(private val context: Context) {
         private val BITALK_SERVICE_UUID = UUID.fromString("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
         private val BITALK_CHARACTERISTIC_UUID = UUID.fromString("6ba7b811-9dad-11d1-80b4-00c04fd430c8")
         
-        // Scan and advertising settings
-        private const val SCAN_PERIOD_MS = 10000L // 10 seconds
-        private const val SCAN_INTERVAL_MS = 30000L // 30 seconds between scans
+        // Scan and advertising settings - aggressive for background discovery
+        private const val SCAN_PERIOD_MS = 10000L // 10 seconds - shorter bursts
+        private const val SCAN_INTERVAL_MS = 5000L // 5 seconds between scans - more frequent
         private const val ADVERTISE_TIMEOUT_MS = 0 // Continuous advertising
-        private const val USER_TIMEOUT_MS = 45000L // 45 seconds - remove users not seen recently
-        private const val CLEANUP_INTERVAL_MS = 15000L // 15 seconds - cleanup stale users
+        private const val USER_TIMEOUT_MS = 60000L // 60 seconds - shorter timeout for responsiveness
+        private const val CLEANUP_INTERVAL_MS = 15000L // 15 seconds - more frequent cleanup
+        private const val SCAN_RESTART_INTERVAL_MS = 300000L // 5 minutes - less disruptive restarts
     }
     
     // Bluetooth components
@@ -91,6 +92,9 @@ class BitalkBLEService(private val context: Context) {
         
         // Start periodic cleanup of stale users
         startPeriodicCleanup()
+        
+        // Start periodic scan restarts for background reliability
+        startPeriodicScanRestarts()
         
         return true
     }
@@ -153,6 +157,13 @@ class BitalkBLEService(private val context: Context) {
      */
     fun getNearbyUsers(): List<NearbyUser> {
         return nearbyUsers.values.filter { it.isActive() }
+    }
+    
+    /**
+     * Check if BLE services are active
+     */
+    fun isActive(): Boolean {
+        return isActive
     }
     
     /**
@@ -231,7 +242,7 @@ class BitalkBLEService(private val context: Context) {
         
         try {
             val settings = AdvertiseSettings.Builder()
-                .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
+                .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER) // Better for background
                 .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM)
                 .setConnectable(true)
                 .setTimeout(ADVERTISE_TIMEOUT_MS)
@@ -253,18 +264,37 @@ class BitalkBLEService(private val context: Context) {
     }
     
     /**
-     * Start periodic scanning
+     * Start continuous scanning - no stops to avoid Android throttling
      */
     private fun startPeriodicScanning() {
         serviceScope.launch {
+            Log.i(TAG, "*** STARTING CONTINUOUS BACKGROUND SCANNING - NO STOPS ***")
+            
+            // Start scanning once and never stop (except for restarts)
+            if (startScan()) {
+                Log.i(TAG, "Continuous scanning started successfully")
+            } else {
+                Log.e(TAG, "Failed to start continuous scanning")
+            }
+            
+            // Just monitor scanning status
+            var checkCount = 0
             while (isActive) {
-                startScan()
-                delay(SCAN_PERIOD_MS)
-                stopScan()
-                delay(SCAN_INTERVAL_MS - SCAN_PERIOD_MS)
+                delay(10000) // Check every 10 seconds
+                Log.i(TAG, "*** SCAN STATUS CHECK ${++checkCount} *** Active: $isActive")
+                
+                // Log current nearby users count
+                val nearbyCount = nearbyUsers.size
+                Log.i(TAG, "Current nearby users: $nearbyCount")
+                if (nearbyCount > 0) {
+                    nearbyUsers.values.forEach { user ->
+                        Log.i(TAG, "  - ${user.username}: ${user.formattedDistance}, last seen ${(System.currentTimeMillis() - user.lastSeen)/1000}s ago")
+                    }
+                }
             }
         }
     }
+    
     
     /**
      * Start periodic cleanup of stale users
@@ -275,6 +305,47 @@ class BitalkBLEService(private val context: Context) {
                 delay(CLEANUP_INTERVAL_MS)
                 cleanupStaleUsers()
             }
+        }
+    }
+    
+    /**
+     * Start periodic scan restarts to combat Android background restrictions
+     */
+    private fun startPeriodicScanRestarts() {
+        serviceScope.launch {
+            while (isActive) {
+                delay(SCAN_RESTART_INTERVAL_MS)
+                Log.i(TAG, "*** PERIODIC SCAN RESTART - Combating background restrictions ***")
+                restartScanning()
+            }
+        }
+    }
+    
+    /**
+     * Restart scanning completely - helps with Android background restrictions
+     */
+    private fun restartScanning() {
+        try {
+            Log.i(TAG, "Restarting BLE scanning for background reliability")
+            
+            // Stop current scanning
+            try {
+                bluetoothLeScanner?.stopScan(scanCallback)
+                bluetoothLeScanner?.stopScan(opportunisticScanCallback)
+                Log.d(TAG, "Stopped current scans")
+            } catch (e: SecurityException) {
+                Log.w(TAG, "Permission denied stopping scan for restart: ${e.message}")
+            }
+            
+            // Small delay before restart
+            Thread.sleep(1000)
+            
+            // Start fresh scan
+            startScan()
+            Log.i(TAG, "BLE scanning restarted successfully")
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error restarting scanning: ${e.message}")
         }
     }
     
@@ -304,12 +375,17 @@ class BitalkBLEService(private val context: Context) {
     }
     
     /**
-     * Start BLE scan
+     * Start BLE scan with dual-mode settings
+     * @return true if scan started successfully, false otherwise
      */
-    private fun startScan() {
-        try {
+    private fun startScan(): Boolean {
+        return try {
+            // Always try low-latency first for best performance
             val settings = ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY) // Fast discovery
+                .setReportDelay(0) // Report immediately
+                .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE) // Aggressive matching
+                .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES) // All matches
                 .build()
             
             val filters = listOf(
@@ -319,10 +395,40 @@ class BitalkBLEService(private val context: Context) {
             )
             
             bluetoothLeScanner?.startScan(filters, settings, scanCallback)
-            Log.d(TAG, "Started BLE scan")
+            Log.d(TAG, "Started BLE scan with low-latency mode")
+            
+            // Also start opportunistic scan as fallback for background
+            startOpportunisticScanFallback()
+            
+            true
             
         } catch (e: SecurityException) {
             Log.e(TAG, "Permission denied starting scan: ${e.message}")
+            false
+        } catch (e: Exception) {
+            Log.e(TAG, "Error starting scan: ${e.message}")
+            false
+        }
+    }
+    
+    /**
+     * Start opportunistic scan as fallback for background scanning
+     */
+    private fun startOpportunisticScanFallback() {
+        try {
+            val opportunisticSettings = ScanSettings.Builder()
+                .setScanMode(ScanSettings.SCAN_MODE_OPPORTUNISTIC)
+                .setReportDelay(0)
+                .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
+                .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
+                .build()
+            
+            // Use empty filter for opportunistic mode to catch all BLE activity
+            bluetoothLeScanner?.startScan(emptyList(), opportunisticSettings, opportunisticScanCallback)
+            Log.d(TAG, "Started opportunistic scan fallback")
+            
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not start opportunistic scan fallback: ${e.message}")
         }
     }
     
@@ -332,7 +438,8 @@ class BitalkBLEService(private val context: Context) {
     private fun stopScan() {
         try {
             bluetoothLeScanner?.stopScan(scanCallback)
-            Log.d(TAG, "Stopped BLE scan")
+            bluetoothLeScanner?.stopScan(opportunisticScanCallback)
+            Log.d(TAG, "Stopped BLE scans")
         } catch (e: SecurityException) {
             Log.e(TAG, "Permission denied stopping scan: ${e.message}")
         }
@@ -349,14 +456,79 @@ class BitalkBLEService(private val context: Context) {
         }
     }
     
-    // Scan callback
+    // Scan callback with detailed logging
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult?) {
-            result?.let { handleScanResult(it) }
+            Log.i(TAG, "*** PRIMARY SCAN RESULT *** callbackType: $callbackType, device: ${result?.device?.address}, RSSI: ${result?.rssi}")
+            result?.let { 
+                Log.i(TAG, "Service UUIDs: ${it.scanRecord?.serviceUuids}")
+                handleScanResult(it) 
+            }
+        }
+        
+        override fun onBatchScanResults(results: MutableList<ScanResult>) {
+            Log.i(TAG, "*** PRIMARY BATCH SCAN RESULTS: ${results.size} devices found ***")
+            if (results.isNotEmpty()) {
+                results.forEach { result ->
+                    Log.i(TAG, "Primary batch result: ${result.device.address}, RSSI: ${result.rssi}, serviceUUIDs: ${result.scanRecord?.serviceUuids}")
+                    handleScanResult(result)
+                }
+            } else {
+                Log.w(TAG, "Empty primary batch scan results - possible Android throttling")
+            }
         }
         
         override fun onScanFailed(errorCode: Int) {
-            Log.e(TAG, "Scan failed with error: $errorCode")
+            Log.e(TAG, "*** PRIMARY SCAN FAILED *** Error code: $errorCode")
+            when (errorCode) {
+                SCAN_FAILED_ALREADY_STARTED -> Log.e(TAG, "Scan already started")
+                SCAN_FAILED_APPLICATION_REGISTRATION_FAILED -> Log.e(TAG, "App registration failed") 
+                SCAN_FAILED_FEATURE_UNSUPPORTED -> Log.e(TAG, "Feature unsupported")
+                SCAN_FAILED_INTERNAL_ERROR -> Log.e(TAG, "Internal error")
+                else -> Log.e(TAG, "Unknown scan error: $errorCode")
+            }
+            
+            // Try to restart scanning after failure
+            serviceScope.launch {
+                delay(5000) // Wait 5 seconds
+                if (isActive) {
+                    Log.i(TAG, "Restarting scan after failure")
+                    restartScanning()
+                }
+            }
+        }
+    }
+    
+    // Opportunistic scan callback - filters for our service UUID
+    private val opportunisticScanCallback = object : ScanCallback() {
+        override fun onScanResult(callbackType: Int, result: ScanResult?) {
+            result?.let { scanResult ->
+                Log.d(TAG, "*** OPPORTUNISTIC SCAN RESULT *** device: ${scanResult.device.address}, serviceUUIDs: ${scanResult.scanRecord?.serviceUuids}")
+                // Only process if it's advertising our service UUID
+                val serviceUuids = scanResult.scanRecord?.serviceUuids
+                if (serviceUuids?.contains(ParcelUuid(BITALK_SERVICE_UUID)) == true) {
+                    Log.i(TAG, "*** OPPORTUNISTIC FOUND BITALK DEVICE: ${scanResult.device.address} ***")
+                    handleScanResult(scanResult)
+                } else {
+                    Log.d(TAG, "Opportunistic scan - not a Bitalk device")
+                }
+            }
+        }
+        
+        override fun onBatchScanResults(results: MutableList<ScanResult>) {
+            Log.i(TAG, "*** OPPORTUNISTIC BATCH RESULTS: ${results.size} devices ***")
+            results.forEach { result ->
+                val serviceUuids = result.scanRecord?.serviceUuids
+                Log.d(TAG, "Opportunistic batch device: ${result.device.address}, serviceUUIDs: $serviceUuids")
+                if (serviceUuids?.contains(ParcelUuid(BITALK_SERVICE_UUID)) == true) {
+                    Log.i(TAG, "*** OPPORTUNISTIC BATCH FOUND BITALK DEVICE: ${result.device.address} ***")
+                    handleScanResult(result)
+                }
+            }
+        }
+        
+        override fun onScanFailed(errorCode: Int) {
+            Log.e(TAG, "*** OPPORTUNISTIC SCAN FAILED *** Error code: $errorCode")
         }
     }
     

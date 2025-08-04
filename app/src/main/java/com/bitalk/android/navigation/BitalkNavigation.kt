@@ -25,7 +25,8 @@ object BitalkDestinations {
 @Composable
 fun BitalkNavigation(
     navController: NavHostController = rememberNavController(),
-    startDestination: String = BitalkDestinations.ONBOARDING_WELCOME
+    startDestination: String = BitalkDestinations.ONBOARDING_WELCOME,
+    onOnboardingComplete: () -> Unit = {}
 ) {
     NavHost(
         navController = navController,
@@ -65,6 +66,7 @@ fun BitalkNavigation(
         composable(BitalkDestinations.ONBOARDING_PERMISSIONS) {
             OnboardingPermissionsScreen(
                 onComplete = {
+                    onOnboardingComplete() // Notify MainActivity to start BLE service
                     navController.navigate(BitalkDestinations.MAIN_SCREEN) {
                         // Clear backstack so user can't go back to onboarding
                         popUpTo(BitalkDestinations.ONBOARDING_WELCOME) {

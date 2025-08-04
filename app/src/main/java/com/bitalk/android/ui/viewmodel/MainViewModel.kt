@@ -4,9 +4,8 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.bitalk.android.ble.BitalkBLEService
-import com.bitalk.android.ble.BitalkBLEDelegate
 import com.bitalk.android.data.UserManager
+import com.bitalk.android.service.ServiceManager
 import com.bitalk.android.model.DefaultTopics
 import com.bitalk.android.model.NearbyUser
 import com.bitalk.android.model.UserProfile
@@ -17,18 +16,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /**
- * Main screen ViewModel managing app state and BLE service
+ * Main screen ViewModel managing app state
  */
-class MainViewModel : ViewModel(), BitalkBLEDelegate {
+class MainViewModel : ViewModel() {
     
     companion object {
         private const val TAG = "MainViewModel"
     }
     
     // Services
-    private var bleService: BitalkBLEService? = null
     private var userManager: UserManager? = null
-    private var notificationService: NotificationService? = null
     
     // UI State
     private val _uiState = MutableStateFlow(MainUIState())
@@ -38,38 +35,32 @@ class MainViewModel : ViewModel(), BitalkBLEDelegate {
      * Initialize ViewModel with Android context
      */
     fun initialize(context: Context) {
-        if (bleService != null) return // Already initialized
+        if (userManager != null) return // Already initialized
         
         Log.d(TAG, "Initializing MainViewModel")
         
         // Initialize services
         userManager = UserManager(context)
-        notificationService = NotificationService(context)
-        bleService = BitalkBLEService(context).apply {
-            delegate = this@MainViewModel
-        }
         
         // Load user profile
         loadUserProfile()
         
-        // Start BLE service if user has completed onboarding
-        val currentProfile = _uiState.value.userProfile
-        if (userManager?.hasCompletedOnboarding() == true && currentProfile.topics.isNotEmpty()) {
-            startBLEService(currentProfile)
-        }
-        // Don't create test profile - let onboarding handle profile creation
+        // Update scanning status based on actual BLE scanning state
+        updateState { it.copy(isScanning = ServiceManager.isBLEScanning()) }
+        
+        // Start periodic updates to get nearby users from service
+        startPeriodicUpdates()
     }
     
     /**
      * Toggle scanning on/off
      */
     fun toggleScanning() {
-        val currentState = _uiState.value
-        if (currentState.isScanning) {
-            stopBLEService()
-        } else {
-            startBLEService(currentState.userProfile)
-        }
+        Log.d(TAG, "Toggle scanning requested")
+        val success = ServiceManager.toggleScanning()
+        val isScanning = ServiceManager.isBLEScanning()
+        updateState { it.copy(isScanning = isScanning) }
+        Log.d(TAG, "Scanning toggled - success: $success, isScanning: $isScanning")
     }
     
     /**
@@ -77,10 +68,10 @@ class MainViewModel : ViewModel(), BitalkBLEDelegate {
      */
     fun updateUserProfile(newProfile: UserProfile) {
         userManager?.saveUserProfile(newProfile)
-        _uiState.value = _uiState.value.copy(userProfile = newProfile)
+        updateState { it.copy(userProfile = newProfile) }
         
-        // Update BLE service with new profile
-        bleService?.updateUserProfile(newProfile)
+        // Note: Profile updates will be handled by the foreground service
+        Log.d(TAG, "Profile updated: ${newProfile.username}")
     }
     
     /**
@@ -144,96 +135,38 @@ class MainViewModel : ViewModel(), BitalkBLEDelegate {
     
     
     /**
-     * Start BLE service
+     * Start periodic updates to get nearby users from service
      */
-    private fun startBLEService(profile: UserProfile) {
+    private fun startPeriodicUpdates() {
         viewModelScope.launch {
-            val success = bleService?.startServices(profile) ?: false
-            _uiState.value = _uiState.value.copy(isScanning = success)
-            
-            if (success) {
-                Log.d(TAG, "BLE service started successfully")
-            } else {
-                Log.e(TAG, "Failed to start BLE service")
+            while (true) {
+                // Get nearby users from service
+                val nearbyUsers = ServiceManager.getNearbyUsers()
+                val isScanning = ServiceManager.isBLEScanning()
+                
+                updateState { state ->
+                    state.copy(
+                        nearbyUsers = nearbyUsers,
+                        isScanning = isScanning
+                    )
+                }
+                
+                // Wait before next update
+                kotlinx.coroutines.delay(2000) // Update every 2 seconds
             }
         }
     }
     
     /**
-     * Stop BLE service
+     * Helper method to update state
      */
-    private fun stopBLEService() {
-        bleService?.stopServices()
-        _uiState.value = _uiState.value.copy(
-            isScanning = false
-            // DON'T clear nearbyUsers - let them timeout naturally via onUserLost()
-        )
-        Log.d(TAG, "BLE service stopped - keeping existing users until they timeout")
-    }
-    
-    // BitalkBLEDelegate implementation
-    override fun onUserDiscovered(user: NearbyUser) {
-        Log.d(TAG, "User discovered: ${user.username} at ${user.formattedDistance}")
-        
-        val currentUsers = _uiState.value.nearbyUsers.toMutableList()
-        
-        // Check if user already exists by username (prevent duplicates)
-        val existingIndex = currentUsers.indexOfFirst { it.username == user.username }
-        if (existingIndex >= 0) {
-            // Update existing user instead of adding duplicate
-            Log.d(TAG, "User ${user.username} already exists, updating instead of adding")
-            currentUsers[existingIndex] = user
-        } else {
-            // Add new user
-            currentUsers.add(user)
-        }
-        
-        _uiState.value = _uiState.value.copy(nearbyUsers = currentUsers)
-        
-        // Show notification for new users only (not updates)
-        if (existingIndex < 0) {
-            notificationService?.showUserMatchNotification(user)
-        }
-    }
-    
-    override fun onUserUpdated(user: NearbyUser) {
-        Log.d(TAG, "User updated: ${user.username} at ${user.formattedDistance}")
-        
-        val currentUsers = _uiState.value.nearbyUsers.toMutableList()
-        
-        // Find user by username (not device address)
-        val index = currentUsers.indexOfFirst { it.username == user.username }
-        
-        if (index >= 0) {
-            currentUsers[index] = user
-            _uiState.value = _uiState.value.copy(nearbyUsers = currentUsers)
-        } else {
-            Log.w(TAG, "Tried to update non-existent user: ${user.username}")
-            // Add user if not found (fallback)
-            currentUsers.add(user)
-            _uiState.value = _uiState.value.copy(nearbyUsers = currentUsers)
-        }
-    }
-    
-    override fun onUserLost(user: NearbyUser) {
-        Log.d(TAG, "User lost: ${user.username}")
-        
-        val currentUsers = _uiState.value.nearbyUsers.toMutableList()
-        
-        // Remove user by username (not device address)
-        val removed = currentUsers.removeAll { it.username == user.username }
-        
-        if (removed) {
-            Log.d(TAG, "Removed user ${user.username}")
-            _uiState.value = _uiState.value.copy(nearbyUsers = currentUsers)
-        } else {
-            Log.w(TAG, "Tried to remove non-existent user: ${user.username}")
-        }
+    private fun updateState(update: (MainUIState) -> MainUIState) {
+        _uiState.value = update(_uiState.value)
     }
     
     override fun onCleared() {
         super.onCleared()
-        stopBLEService()
+        Log.d(TAG, "MainViewModel cleared")
     }
 }
 
