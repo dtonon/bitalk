@@ -1,6 +1,7 @@
 package com.bitalk.android.ui.screens.onboarding
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -26,7 +27,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bitalk.android.R
 import com.bitalk.android.ui.theme.BitalkAccent
 import com.bitalk.android.ui.viewmodel.OnboardingViewModel
+import com.bitalk.android.ble.BatteryOptimizationManager
 import com.google.accompanist.permissions.*
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -36,6 +39,9 @@ fun OnboardingPermissionsScreen(
 ) {
     val viewModel: OnboardingViewModel = viewModel()
     val context = LocalContext.current
+    val batteryOptimizationManager = remember { BatteryOptimizationManager(context) }
+    var batteryOptimizationStatus by remember { mutableStateOf(batteryOptimizationManager.isBatteryOptimizationIgnored()) }
+    var hasRequestedBatteryOptimization by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.initialize(context)
@@ -61,6 +67,26 @@ fun OnboardingPermissionsScreen(
     }
 
     val multiplePermissionsState = rememberMultiplePermissionsState(permissions)
+
+    // Auto-request battery optimization after required permissions are granted
+    LaunchedEffect(multiplePermissionsState.allPermissionsGranted) {
+        if (multiplePermissionsState.allPermissionsGranted && !hasRequestedBatteryOptimization && !batteryOptimizationStatus) {
+            hasRequestedBatteryOptimization = true
+            batteryOptimizationManager.requestBatteryOptimizationExemption(context as Activity)
+        }
+    }
+
+    // Check battery optimization status when returning to the app
+    LaunchedEffect(Unit) {
+        // Periodically check battery status in case user granted it in settings
+        while (true) {
+            delay(1000) // Check every second
+            val currentStatus = batteryOptimizationManager.isBatteryOptimizationIgnored()
+            if (currentStatus != batteryOptimizationStatus) {
+                batteryOptimizationStatus = currentStatus
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -146,7 +172,7 @@ fun OnboardingPermissionsScreen(
                 PermissionItem(
                     title = stringResource(R.string.permission_battery),
                     description = stringResource(R.string.permission_battery_desc),
-                    isGranted = true // We'll handle this separately
+                    isGranted = batteryOptimizationStatus
                 )
             }
         }
@@ -174,25 +200,22 @@ fun OnboardingPermissionsScreen(
                 )
             }
         } else {
-            Column {
-                Button(
-                    onClick = {
-                        multiplePermissionsState.launchMultiplePermissionRequest()
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = BitalkAccent
-                    )
-                ) {
-                    Text(
-                        text = stringResource(R.string.grant_permissions),
-                        fontSize = 21.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-
+            Button(
+                onClick = {
+                    multiplePermissionsState.launchMultiplePermissionRequest()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = BitalkAccent
+                )
+            ) {
+                Text(
+                    text = stringResource(R.string.grant_permissions),
+                    fontSize = 21.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
     }

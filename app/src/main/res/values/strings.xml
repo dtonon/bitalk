@@ -46,13 +46,14 @@
     <string name="permission_bluetooth">Bluetooth</string>
     <string name="permission_location">Location</string>
     <string name="permission_notifications">Notifications</string>
-    <string name="permission_battery">Battery optimization</string>
+    <string name="permission_battery">Battery optimization (Optional)</string>
     <string name="grant_permissions">Grant permissions</string>
 
     <string name="permission_bluetooth_desc">Required for mesh networking</string>
     <string name="permission_location_desc">Required for BLE scanning (no GPS tracking)</string>
     <string name="permission_notifications_desc">Required for match notifications</string>
-    <string name="permission_battery_desc">Required for background scanning</string>
+    <string name="permission_battery_desc">Optional but recommended for reliable background scanning and notifications</string>
+    <string name="enable_unrestricted_battery">Enable Unrestricted Battery</string>
 
     <!-- User Detail Modal -->
     <string name="first_seen">First seen</string>

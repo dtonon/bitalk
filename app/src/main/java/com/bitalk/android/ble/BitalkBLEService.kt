@@ -117,7 +117,11 @@ class BitalkBLEService(private val context: Context) {
         }
         
         // Stop GATT server
-        gattServer?.close()
+        try {
+            gattServer?.close()
+        } catch (e: SecurityException) {
+            Log.w(TAG, "Permission denied closing GATT server: ${e.message}")
+        }
         gattServer = null
         
         // Clear data
